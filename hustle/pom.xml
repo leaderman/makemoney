@@ -12,6 +12,7 @@
     <modules>
         <module>limiter</module>
         <module>feishu</module>
+        <module>config</module>
     </modules>
 
     <parent>
