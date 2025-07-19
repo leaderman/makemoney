@@ -1,4 +1,4 @@
-package io.github.leaderman.makemoney.hustle.feishu;
+package io.github.leaderman.makemoney.hustle;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

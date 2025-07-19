@@ -11,6 +11,7 @@ import com.lark.oapi.service.bitable.v1.model.ListAppTableReq;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableResp;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableRespBody;
 
+import io.github.leaderman.makemoney.hustle.limiter.LimiterClient;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class BitableClient {
+  private final LimiterClient limiterClient;
   private final FeishuClient feishuClient;
 
   /**
@@ -40,6 +42,8 @@ public class BitableClient {
           .pageToken(pageToken)
           .pageSize(1)
           .build();
+
+      limiterClient.acquire("feishu.bitable.listTables", 20, 60);
 
       ListAppTableResp resp = feishuClient.getClient().bitable().v1().appTable().list(req);
       if (!resp.success()) {
