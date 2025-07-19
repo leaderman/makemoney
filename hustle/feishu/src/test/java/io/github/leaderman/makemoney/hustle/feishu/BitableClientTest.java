@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.lark.oapi.service.bitable.v1.model.AppTable;
+import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
+import com.lark.oapi.service.bitable.v1.model.AppTableView;
 
 @SpringBootTest
 public class BitableClientTest {
@@ -18,6 +20,22 @@ public class BitableClientTest {
     List<AppTable> tables = bitableClient.listTables("XGG1blHrkangStsSV82cvhi1n9d");
     tables.forEach(table -> {
       System.out.println(table.getTableId() + "\t" + table.getName());
+    });
+  }
+
+  @Test
+  public void testListViews() throws Exception {
+    List<AppTableView> views = bitableClient.listViews("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn");
+    views.forEach(view -> {
+      System.out.println(view.getViewId() + "\t" + view.getViewName());
+    });
+  }
+
+  @Test
+  public void testListRecords() throws Exception {
+    List<AppTableRecord> records = bitableClient.listRecords("XGG1blHrkangStsSV82cvhi1n9d");
+    records.forEach(record -> {
+      System.out.println(record.getRecordId() + "\t" + record.getFields());
     });
   }
 }
