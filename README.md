@@ -23,3 +23,8 @@
 - limiter.redis.prefix
 
   Redis 键名称前缀
+
+### feishu
+
+- feishu.appId
+- feishu.appSecret
