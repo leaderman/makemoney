@@ -11,4 +11,17 @@
     </parent>
 
     <artifactId>makemoney-config</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.leaderman</groupId>
+            <artifactId>makemoney-feishu</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+    </dependencies>
 </project>
