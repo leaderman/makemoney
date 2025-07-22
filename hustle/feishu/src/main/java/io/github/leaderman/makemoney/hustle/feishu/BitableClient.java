@@ -4,13 +4,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Component;
 
 import com.lark.oapi.service.bitable.v1.model.AppTable;
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 import com.lark.oapi.service.bitable.v1.model.AppTableView;
+import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReq;
+import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReqBody;
+import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordResp;
+import com.lark.oapi.service.bitable.v1.model.CreateAppTableRecordReq;
+import com.lark.oapi.service.bitable.v1.model.CreateAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableRecordReq;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableRecordRespBody;
@@ -149,5 +156,64 @@ public class BitableClient {
     }
 
     return records;
+  }
+
+  /**
+   * 创建多维表格的记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @param fields   记录的字段。
+   * @return 创建的记录。
+   * @throws Exception
+   */
+  public AppTableRecord createRecord(String appToken, String tableId, Map<String, Object> fields) throws Exception {
+    CreateAppTableRecordReq req = CreateAppTableRecordReq.newBuilder()
+        .appToken(appToken)
+        .tableId(tableId)
+        .appTableRecord(AppTableRecord.newBuilder().fields(fields).build())
+        .build();
+
+    limiterClient.acquire("feishu.bitable.createRecord", 50, 60);
+
+    CreateAppTableRecordResp resp = feishuClient.getClient().bitable().v1().appTableRecord().create(req);
+    if (!resp.success()) {
+      throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+    }
+
+    return resp.getData().getRecord();
+  }
+
+  /**
+   * 获取多维表格的记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @param recordId 记录的唯一标识。
+   * @return 获取的记录。
+   * @throws Exception
+   */
+  public AppTableRecord getRecord(String appToken, String tableId, String recordId) throws Exception {
+    BatchGetAppTableRecordReq req = BatchGetAppTableRecordReq.newBuilder()
+        .appToken(appToken)
+        .tableId(tableId)
+        .batchGetAppTableRecordReqBody(BatchGetAppTableRecordReqBody.newBuilder()
+            .recordIds(new String[] { recordId })
+            .build())
+        .build();
+
+    limiterClient.acquire("feishu.bitable.getRecord", 20, 60);
+
+    BatchGetAppTableRecordResp resp = feishuClient.getClient().bitable().v1().appTableRecord().batchGet(req);
+    if (!resp.success()) {
+      throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+    }
+
+    AppTableRecord[] records = resp.getData().getRecords();
+    if (ArrayUtils.isEmpty(records)) {
+      return null;
+    }
+
+    return records[0];
   }
 }

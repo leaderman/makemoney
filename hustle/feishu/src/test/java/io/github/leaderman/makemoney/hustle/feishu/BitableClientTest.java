@@ -1,6 +1,7 @@
 package io.github.leaderman.makemoney.hustle.feishu;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +38,19 @@ public class BitableClientTest {
     records.forEach(record -> {
       System.out.println(record.getRecordId() + "\t" + record.getFields());
     });
+  }
+
+  @Test
+  public void testCreateRecord() throws Exception {
+    AppTableRecord record = bitableClient.createRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
+        Map.of("名称", "hustle.test.createRecord", "值", "createRecord"));
+    System.out.println(record.getRecordId() + "\t" + record.getFields());
+  }
+
+  @Test
+  public void testGetRecord() throws Exception {
+    AppTableRecord record = bitableClient.getRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
+        "recuRFdbaLSkc2");
+    System.out.println(record.getRecordId() + "\t" + record.getFields());
   }
 }
