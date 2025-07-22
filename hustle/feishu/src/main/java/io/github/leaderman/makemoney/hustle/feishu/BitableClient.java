@@ -232,6 +232,8 @@ public class BitableClient {
   public String getAiOutput(String appToken, String tableId, String recordId, String name, int maxRetries,
       int retryInterval) throws Exception {
     for (int retry = 0; retry < maxRetries; retry++) {
+      Thread.sleep(retryInterval * 1000);
+
       AppTableRecord record = getRecord(appToken, tableId, recordId);
       if (record == null) {
         throw new RuntimeException(String.format("记录不存在：%s", recordId));
@@ -242,8 +244,6 @@ public class BitableClient {
       if (CollectionUtils.isNotEmpty(values)) {
         return values.get(0).get("text");
       }
-
-      Thread.sleep(retryInterval * 1000);
     }
 
     throw new RuntimeException(String.format("获取 AI 输出超时：%s", recordId));
