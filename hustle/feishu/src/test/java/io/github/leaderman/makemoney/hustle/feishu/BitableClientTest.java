@@ -53,4 +53,15 @@ public class BitableClientTest {
         "recuRFdbaLSkc2");
     System.out.println(record.getRecordId() + "\t" + record.getFields());
   }
+
+  @Test
+  public void testGetAiOutput() throws Exception {
+    AppTableRecord record = bitableClient.createRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
+        Map.of("名称", "hustle.test.getAiOutput", "值", "getAiOutput"));
+    System.out.println(record.getRecordId() + "\t" + record.getFields());
+
+    String aiOutput = bitableClient.getAiOutput("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
+        record.getRecordId(), "说明", 10, 3);
+    System.out.println(aiOutput);
+  }
 }

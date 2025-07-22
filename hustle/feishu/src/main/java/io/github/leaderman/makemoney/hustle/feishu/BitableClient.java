@@ -216,4 +216,36 @@ public class BitableClient {
 
     return records[0];
   }
+
+  /**
+   * 获取多维表格的记录的 AI 输出。
+   * 
+   * @param appToken      多维表格的唯一标识。
+   * @param tableId       数据表的唯一标识。
+   * @param recordId      记录的唯一标识。
+   * @param name          字段名称。
+   * @param maxRetries    最大重试次数。
+   * @param retryInterval 重试间隔时间（秒）。
+   * @return AI 输出。
+   * @throws Exception
+   */
+  public String getAiOutput(String appToken, String tableId, String recordId, String name, int maxRetries,
+      int retryInterval) throws Exception {
+    for (int retry = 0; retry < maxRetries; retry++) {
+      AppTableRecord record = getRecord(appToken, tableId, recordId);
+      if (record == null) {
+        throw new RuntimeException(String.format("记录不存在：%s", recordId));
+      }
+
+      @SuppressWarnings("unchecked")
+      List<Map<String, String>> values = (List<Map<String, String>>) record.getFields().get(name);
+      if (CollectionUtils.isNotEmpty(values)) {
+        return values.get(0).get("text");
+      }
+
+      Thread.sleep(retryInterval * 1000);
+    }
+
+    throw new RuntimeException(String.format("获取 AI 输出超时：%s", recordId));
+  }
 }
