@@ -4,8 +4,8 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.leaderman</groupId>
-    <artifactId>makemoney</artifactId>
+    <groupId>io.github.leaderman.makemoney</groupId>
+    <artifactId>hustle</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -13,6 +13,7 @@
         <module>limiter</module>
         <module>feishu</module>
         <module>config</module>
+        <module>coze</module>
     </modules>
 
     <parent>
@@ -96,6 +97,12 @@
                 <groupId>com.bucket4j</groupId>
                 <artifactId>bucket4j_jdk17-lettuce</artifactId>
                 <version>8.14.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.coze</groupId>
+                <artifactId>coze-api</artifactId>
+                <version>LATEST</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

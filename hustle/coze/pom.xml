@@ -3,25 +3,24 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>io.github.leaderman.makemoney</groupId>
         <artifactId>hustle</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hustle-feishu</artifactId>
+    <artifactId>hustle-coze</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-limiter</artifactId>
+            <artifactId>hustle-config</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.larksuite.oapi</groupId>
-            <artifactId>oapi-sdk</artifactId>
+            <groupId>com.coze</groupId>
+            <artifactId>coze-api</artifactId>
         </dependency>
 
         <dependency>

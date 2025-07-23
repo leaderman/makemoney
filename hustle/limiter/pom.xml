@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.leaderman</groupId>
-        <artifactId>makemoney</artifactId>
+        <groupId>io.github.leaderman.makemoney</groupId>
+        <artifactId>hustle</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>makemoney-limiter</artifactId>
+    <artifactId>hustle-limiter</artifactId>
 
     <dependencies>
         <dependency>

@@ -5,17 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.leaderman</groupId>
-        <artifactId>makemoney</artifactId>
+        <groupId>io.github.leaderman.makemoney</groupId>
+        <artifactId>hustle</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>makemoney-config</artifactId>
+    <artifactId>hustle-config</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.leaderman</groupId>
-            <artifactId>makemoney-feishu</artifactId>
+            <groupId>io.github.leaderman.makemoney</groupId>
+            <artifactId>hustle-feishu</artifactId>
             <version>${project.version}</version>
         </dependency>
 
