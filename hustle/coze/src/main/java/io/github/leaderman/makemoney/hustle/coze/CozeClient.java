@@ -12,13 +12,17 @@ import com.coze.openapi.service.config.Consts;
 import com.coze.openapi.service.service.CozeAPI;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
+import io.github.leaderman.makemoney.hustle.limiter.LimiterClient;
 
 @Component
 public class CozeClient {
-  private final CozeAPI coze;
+  private final LimiterClient limiterClient;
+  private final CozeAPI cozeApi;
 
-  public CozeClient(ConfigClient configClient) throws Exception {
-    this.coze = new CozeAPI.Builder()
+  public CozeClient(ConfigClient configClient, LimiterClient limiterClient) throws Exception {
+    this.limiterClient = limiterClient;
+
+    this.cozeApi = new CozeAPI.Builder()
         .auth(new JWTOAuth(new JWTOAuthClient.JWTOAuthBuilder()
             .clientID(configClient.getString("coze.jwt.oauth.client.id"))
             .publicKey(configClient.getString("coze.jwt.oauth.public.key"))
@@ -34,9 +38,9 @@ public class CozeClient {
    * 
    * @param workflowID 工作流 ID。
    * @return 运行结果。
-   * @throws RuntimeException
+   * @throws Exception
    */
-  public String runWorkflow(String workflowID) {
+  public String runWorkflow(String workflowID) throws Exception {
     return runWorkflow(workflowID, null);
   }
 
@@ -46,14 +50,16 @@ public class CozeClient {
    * @param workflowID 工作流 ID。
    * @param parameters 参数。
    * @return 运行结果。
-   * @throws RuntimeException
+   * @throws Exception
    */
-  public String runWorkflow(String workflowID, Map<String, Object> parameters) {
+  public String runWorkflow(String workflowID, Map<String, Object> parameters) throws Exception {
     RunWorkflowReq req = RunWorkflowReq.builder().workflowID(workflowID).parameters(parameters).build();
 
-    RunWorkflowResp resp = this.coze.workflows().runs().create(req);
+    limiterClient.acquire("coze.api.workflow", 200, 1);
+
+    RunWorkflowResp resp = this.cozeApi.workflows().runs().create(req);
     if (resp.getCode() != 0) {
-      throw new RuntimeException(
+      throw new Exception(
           String.format("错误码：%s，错误描述：%s，调试页面：%s", resp.getCode(), resp.getMsg(), resp.getDebugURL()));
     }
 

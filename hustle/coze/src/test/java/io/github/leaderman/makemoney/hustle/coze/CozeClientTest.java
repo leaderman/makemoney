@@ -13,16 +13,16 @@ public class CozeClientTest {
   private CozeClient cozeClient;
 
   @Test
-  public void testRunWorkflow() {
+  public void testRunWorkflow() throws Exception {
     String data = cozeClient.runWorkflow("7484159891621101603");
     System.out.println(data);
   }
 
   @Test
-  public void testRunWorkflowWithParameters() {
+  public void testRunWorkflowWithParameters() throws Exception {
     Map<String, Object> parameters = new HashMap<>();
     parameters.put("code", "sz002594");
-    parameters.put("tradingDate", "2025-07-23");
+    parameters.put("tradingDate", "2025-07-24");
 
     String data = cozeClient.runWorkflow("7498162044832677939", parameters);
     System.out.println(data);
