@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockData;
+
 @SpringBootTest
 public class CozeClientTest {
   @Autowired
@@ -26,5 +28,11 @@ public class CozeClientTest {
 
     String data = cozeClient.runWorkflow("7498162044832677939", parameters);
     System.out.println(data);
+  }
+
+  @Test
+  public void testGetStockData() throws Exception {
+    StockData stockData = cozeClient.getStockData("sz002594", "2025-07-24");
+    System.out.println(stockData);
   }
 }

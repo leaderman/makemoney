@@ -10,23 +10,31 @@ import com.coze.openapi.service.auth.JWTOAuth;
 import com.coze.openapi.service.auth.JWTOAuthClient;
 import com.coze.openapi.service.config.Consts;
 import com.coze.openapi.service.service.CozeAPI;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
+import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockData;
+import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockDataContainer;
 import io.github.leaderman.makemoney.hustle.limiter.LimiterClient;
 
 @Component
 public class CozeClient {
+  private final ConfigClient configClient;
   private final LimiterClient limiterClient;
   private final CozeAPI cozeApi;
+  private final ObjectMapper objectMapper;
 
-  public CozeClient(ConfigClient configClient, LimiterClient limiterClient) throws Exception {
+  public CozeClient(ConfigClient configClient, LimiterClient limiterClient, ObjectMapper objectMapper)
+      throws Exception {
+    this.configClient = configClient;
     this.limiterClient = limiterClient;
+    this.objectMapper = objectMapper;
 
     this.cozeApi = new CozeAPI.Builder()
         .auth(new JWTOAuth(new JWTOAuthClient.JWTOAuthBuilder()
-            .clientID(configClient.getString("coze.jwt.oauth.client.id"))
-            .publicKey(configClient.getString("coze.jwt.oauth.public.key"))
-            .privateKey(configClient.getString("coze.jwt.oauth.private.key"))
+            .clientID(this.configClient.getString("coze.jwt.oauth.client.id"))
+            .publicKey(this.configClient.getString("coze.jwt.oauth.public.key"))
+            .privateKey(this.configClient.getString("coze.jwt.oauth.private.key"))
             .baseURL(Consts.COZE_CN_BASE_URL)
             .build()))
         .baseURL(Consts.COZE_CN_BASE_URL)
@@ -36,12 +44,12 @@ public class CozeClient {
   /**
    * 运行工作流。
    * 
-   * @param workflowID 工作流 ID。
+   * @param workflowId 工作流 ID。
    * @return 运行结果。
    * @throws Exception
    */
-  public String runWorkflow(String workflowID) throws Exception {
-    return runWorkflow(workflowID, null);
+  public String runWorkflow(String workflowId) throws Exception {
+    return runWorkflow(workflowId, null);
   }
 
   /**
@@ -52,8 +60,8 @@ public class CozeClient {
    * @return 运行结果。
    * @throws Exception
    */
-  public String runWorkflow(String workflowID, Map<String, Object> parameters) throws Exception {
-    RunWorkflowReq req = RunWorkflowReq.builder().workflowID(workflowID).parameters(parameters).build();
+  public String runWorkflow(String workflowId, Map<String, Object> parameters) throws Exception {
+    RunWorkflowReq req = RunWorkflowReq.builder().workflowID(workflowId).parameters(parameters).build();
 
     limiterClient.acquire("coze.api.workflow", 200, 1);
 
@@ -64,5 +72,21 @@ public class CozeClient {
     }
 
     return resp.getData();
+  }
+
+  /**
+   * 获取股票数据。
+   * 
+   * @param code        股票代码。
+   * @param tradingDate 交易日期。
+   * @return 股票数据。
+   * @throws Exception
+   */
+  public StockData getStockData(String code, String tradingDate) throws Exception {
+    String workflowId = this.configClient.getString("coze.workflow.get.stock.data");
+    Map<String, Object> parameters = Map.of("code", code, "tradingDate", tradingDate);
+
+    String data = runWorkflow(workflowId, parameters);
+    return this.objectMapper.readValue(data, StockDataContainer.class).getStockData();
   }
 }
