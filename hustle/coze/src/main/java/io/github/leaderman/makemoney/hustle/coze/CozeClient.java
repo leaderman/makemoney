@@ -1,5 +1,6 @@
 package io.github.leaderman.makemoney.hustle.coze;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -13,8 +14,10 @@ import com.coze.openapi.service.service.CozeAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
+import io.github.leaderman.makemoney.hustle.coze.workflow.stock.Stock;
 import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockData;
 import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockDataContainer;
+import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StocksContainer;
 import io.github.leaderman.makemoney.hustle.limiter.LimiterClient;
 
 @Component
@@ -38,6 +41,7 @@ public class CozeClient {
             .baseURL(Consts.COZE_CN_BASE_URL)
             .build()))
         .baseURL(Consts.COZE_CN_BASE_URL)
+        .readTimeout(5 * 60 * 1000)
         .build();
   }
 
@@ -88,5 +92,31 @@ public class CozeClient {
 
     String data = runWorkflow(workflowId, parameters);
     return this.objectMapper.readValue(data, StockDataContainer.class).getStockData();
+  }
+
+  /**
+   * 获取上海证券交易所股票列表（A 股）。
+   * 
+   * @return 股票列表。
+   * @throws Exception
+   */
+  public List<Stock> getSseStocks() throws Exception {
+    String workflowId = this.configClient.getString("coze.workflow.get.sse.stocks");
+
+    String data = runWorkflow(workflowId);
+    return this.objectMapper.readValue(data, StocksContainer.class).getStocks();
+  }
+
+  /**
+   * 获取深圳证券交易所股票列表（A 股）。
+   * 
+   * @return 股票列表。
+   * @throws Exception
+   */
+  public List<Stock> getSzseStocks() throws Exception {
+    String workflowId = this.configClient.getString("coze.workflow.get.szse.stocks");
+
+    String data = runWorkflow(workflowId);
+    return this.objectMapper.readValue(data, StocksContainer.class).getStocks();
   }
 }
