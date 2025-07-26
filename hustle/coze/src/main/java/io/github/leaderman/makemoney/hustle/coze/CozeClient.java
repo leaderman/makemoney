@@ -67,7 +67,7 @@ public class CozeClient {
   public String runWorkflow(String workflowId, Map<String, Object> parameters) throws Exception {
     RunWorkflowReq req = RunWorkflowReq.builder().workflowID(workflowId).parameters(parameters).build();
 
-    limiterClient.acquire("coze.api.workflow", 200, 1);
+    this.limiterClient.acquire("coze.api.workflow", 200, 1);
 
     RunWorkflowResp resp = this.cozeApi.workflows().runs().create(req);
     if (resp.getCode() != 0) {
@@ -89,6 +89,8 @@ public class CozeClient {
   public StockData getStockData(String code, String tradingDate) throws Exception {
     String workflowId = this.configClient.getString("coze.workflow.get.stock.data");
     Map<String, Object> parameters = Map.of("code", code, "tradingDate", tradingDate);
+
+    this.limiterClient.acquire("coze.workflow.get.stock.data", 50, 1);
 
     String data = runWorkflow(workflowId, parameters);
     return this.objectMapper.readValue(data, StockDataContainer.class).getStockData();
