@@ -34,4 +34,10 @@ public class StockMarketInfoEntityServiceTest {
 
     stockMarketInfoEntityService.save(stockMarketInfoEntity);
   }
+
+  @Test
+  public void testGet() {
+    StockMarketInfoEntity stockMarketInfoEntity = stockMarketInfoEntityService.get("sz000001", "2025-07-25");
+    System.out.println(stockMarketInfoEntity);
+  }
 }
