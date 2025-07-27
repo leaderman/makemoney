@@ -16,6 +16,7 @@
         <module>coze</module>
         <module>domain</module>
         <module>stock</module>
+        <module>command</module>
     </modules>
 
     <parent>
@@ -117,6 +118,12 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>9.3.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli-spring-boot-starter</artifactId>
+                <version>4.7.7</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
