@@ -45,8 +45,9 @@ public class SyncStockMarketInfoEntityCommand implements Runnable {
 
       log.info("同步股票市场信息开始");
 
-      for (StockEntity stock : stocks) {
-        log.info("获取股票市场信息：{} {} {}", stock.getCode(), stock.getName(), day);
+      for (int index = 0; index < stocks.size(); index++) {
+        StockEntity stock = stocks.get(index);
+        log.info("获取股票市场信息（{}/{}）：{} {} {}", index + 1, stocks.size(), stock.getCode(), stock.getName(), day);
 
         StockData stockData = cozeClient.getStockData(stock.getCode(), day);
         if (Objects.isNull(stockData)) {
