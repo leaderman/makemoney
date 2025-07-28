@@ -17,7 +17,7 @@ import picocli.CommandLine.Command;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Command(name = "SyncStock", description = "同步股票")
+@Command(name = "SyncStock", description = "同步股票", mixinStandardHelpOptions = true)
 public class SyncStockCommand implements Runnable {
   private final CozeClient cozeClient;
   private final StockService stockService;
