@@ -17,6 +17,7 @@
         <module>domain</module>
         <module>stock</module>
         <module>command</module>
+        <module>lang</module>
     </modules>
 
     <parent>

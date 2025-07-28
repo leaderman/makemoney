@@ -6,7 +6,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Component
-@Command(name = "Hello", description = "演示命令")
+@Command(name = "Hello", description = "演示命令", mixinStandardHelpOptions = true)
 public class HelloCommand implements Runnable {
   @Option(names = { "-n", "--name" }, description = "姓名")
   private String name = "world";

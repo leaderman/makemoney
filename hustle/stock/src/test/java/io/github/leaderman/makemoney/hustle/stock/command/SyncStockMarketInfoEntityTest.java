@@ -17,7 +17,7 @@ public class SyncStockMarketInfoEntityTest {
 
   @Test
   public void testRun() {
-    String[] args = { "-d", "2025-07-25" };
+    String[] args = { "-d", "2025-07-28" };
 
     new CommandLine(syncStockMarketInfoEntityCommand, picocliSpringFactory).execute(args);
   }

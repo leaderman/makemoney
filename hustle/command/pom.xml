@@ -14,8 +14,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli-spring-boot-starter</artifactId>
+            <groupId>io.github.leaderman.makemoney</groupId>
+            <artifactId>hustle-stock</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
