@@ -17,6 +17,7 @@ import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockData;
 import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockEntity;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockMarketInfoEntity;
+import io.github.leaderman.makemoney.hustle.stock.service.StockHolidayService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockMarketInfoEntityService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class SyncStockMarketInfoEntityCommand implements Runnable {
   private final CozeClient cozeClient;
   private final StockService stockService;
   private final StockMarketInfoEntityService stockMarketInfoEntityService;
+  private final StockHolidayService stockHolidayService;
 
   /**
    * 同步指定股票和日期。
@@ -188,6 +190,11 @@ public class SyncStockMarketInfoEntityCommand implements Runnable {
       // 同步
       log.info("同步开始");
       for (String date : dates) {
+        if (this.stockHolidayService.isCnHoliday(date)) {
+          log.info("跳过非交易日期：{}", date);
+          continue;
+        }
+
         syncDate(stocks, date);
       }
       log.info("同步结束");
