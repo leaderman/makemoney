@@ -9,7 +9,7 @@ spring:
       maximumPoolSize: 30
 
 feishu:
-  appId: cli_a8f2684a097b500c
+  appId: cli_a8f2684a097b500c2
   appSecret: KOyRW9xuN5fGhU5A2dWScd0XMJ86mhmG
 
 limiter:

@@ -1,11 +1,12 @@
 package io.github.leaderman.makemoney.hustle.config;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +17,18 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 配置客户端，从飞书多维表格中加载配置。
+ * 配置客户端。
  */
 @Component
 @Slf4j
 public class ConfigClient {
+  private final ConfigurableEnvironment environment;
   private final BitableClient bitableClient;
   private final List<String> bitables;
 
-  private final Map<String, Object> fields = new ConcurrentHashMap<>();
-
-  public ConfigClient(BitableClient bitableClient, @Value("${config.bitables}") List<String> bitables) {
+  public ConfigClient(ConfigurableEnvironment environment, BitableClient bitableClient,
+      @Value("${config.bitables}") List<String> bitables) {
+    this.environment = environment;
     this.bitableClient = bitableClient;
     this.bitables = bitables;
   }
@@ -36,18 +38,24 @@ public class ConfigClient {
    */
   @PostConstruct
   @Scheduled(cron = "${config.cron}")
-  public void load() {
+  public void refresh() {
     try {
+      Map<String, Object> fields = new HashMap<>();
+
       for (String bitable : this.bitables) {
         List<AppTableRecord> records = bitableClient.listRecords(bitable);
         for (AppTableRecord record : records) {
-          this.fields.put(record.getFields().get("名称").toString(), record.getFields().get("值"));
+          fields.put(record.getFields().get("名称").toString(), record.getFields().get("值"));
         }
-
-        log.info("多维表格 {} 加载完成，共加载 {} 条记录", bitable, records.size());
       }
+
+      BitablePropertySource source = (BitablePropertySource) this.environment.getPropertySources()
+          .get(BitablePropertySource.NAME);
+      source.refresh(fields);
+
+      log.info("多维表格配置刷新 {} 条记录", fields.size());
     } catch (Exception e) {
-      log.error("多维表格配置加载失败：{}", ExceptionUtils.getStackTrace(e));
+      log.error("多维表格配置刷新错误：{}", ExceptionUtils.getStackTrace(e));
     }
   }
 
@@ -58,7 +66,7 @@ public class ConfigClient {
    * @return 配置项是否存在
    */
   public boolean contains(String name) {
-    return this.fields.containsKey(name);
+    return this.environment.containsProperty(name);
   }
 
   /**
@@ -72,7 +80,7 @@ public class ConfigClient {
       throw new IllegalArgumentException("配置项 " + name + " 不存在");
     }
 
-    return this.fields.get(name);
+    return this.environment.getProperty(name);
   }
 
   /**

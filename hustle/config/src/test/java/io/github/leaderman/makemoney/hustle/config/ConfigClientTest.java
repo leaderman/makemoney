@@ -51,6 +51,18 @@ public class ConfigClientTest {
 
   @Test
   public void testLoad() throws InterruptedException {
+    Thread thread = new Thread(() -> {
+      while (true) {
+        try {
+          Thread.sleep(60 * 1000);
+          System.out.println(configClient.getString("hustle.test.string"));
+        } catch (InterruptedException e) {
+        }
+      }
+    });
+    thread.setDaemon(true);
+    thread.start();
+
     Thread.sleep(5 * 60 * 1000);
   }
 }
