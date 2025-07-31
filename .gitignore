@@ -1,5 +1,6 @@
 /**/.idea
 /**/java.iml
 /**/.vscode
+/**/src/main/resources
 /**/src/test/resources
 /**/target
