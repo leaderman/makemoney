@@ -36,6 +36,7 @@ public class StockMarketInfoService extends ServiceImpl<StockMarketInfoEntityMap
     return this.baseMapper.selectList(new LambdaQueryWrapper<StockMarketInfoEntity>()
         .eq(StockMarketInfoEntity::getCode, code)
         .orderByDesc(StockMarketInfoEntity::getDay)
-        .last("limit " + days));
+        .last("limit " + days))
+        .reversed();
   }
 }
