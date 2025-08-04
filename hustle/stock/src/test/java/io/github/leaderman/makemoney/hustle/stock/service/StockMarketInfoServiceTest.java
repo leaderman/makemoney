@@ -1,6 +1,7 @@
 package io.github.leaderman.makemoney.hustle.stock.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockMarketInfoEntity;
 
 @SpringBootTest
-public class StockMarketInfoEntityServiceTest {
+public class StockMarketInfoServiceTest {
   @Autowired
-  private StockMarketInfoEntityService stockMarketInfoEntityService;
+  private StockMarketInfoService stockMarketInfoEntityService;
 
   @Test
   public void testSave() {
@@ -39,5 +40,11 @@ public class StockMarketInfoEntityServiceTest {
   public void testGet() {
     StockMarketInfoEntity stockMarketInfoEntity = stockMarketInfoEntityService.get("sz000001", "2025-07-25");
     System.out.println(stockMarketInfoEntity);
+  }
+
+  @Test
+  public void testGetLatest() {
+    List<StockMarketInfoEntity> stockMarketInfoEntities = stockMarketInfoEntityService.getLatest("sz000001", 10);
+    stockMarketInfoEntities.forEach(System.out::println);
   }
 }

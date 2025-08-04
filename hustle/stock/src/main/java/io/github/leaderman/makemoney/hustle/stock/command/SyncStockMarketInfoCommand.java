@@ -18,7 +18,7 @@ import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockEntity;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockMarketInfoEntity;
 import io.github.leaderman.makemoney.hustle.stock.service.StockHolidayService;
-import io.github.leaderman.makemoney.hustle.stock.service.StockMarketInfoEntityService;
+import io.github.leaderman.makemoney.hustle.stock.service.StockMarketInfoService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import picocli.CommandLine.Option;
 @RequiredArgsConstructor
 @Slf4j
 @Command(name = "SyncStockMarketInfoEntity", description = "同步股票市场信息", mixinStandardHelpOptions = true)
-public class SyncStockMarketInfoEntityCommand implements Runnable {
+public class SyncStockMarketInfoCommand implements Runnable {
   @Option(names = { "-d", "--day" }, description = "日期，格式：yyyy-MM-dd")
   private String day;
 
@@ -47,7 +47,7 @@ public class SyncStockMarketInfoEntityCommand implements Runnable {
 
   private final CozeClient cozeClient;
   private final StockService stockService;
-  private final StockMarketInfoEntityService stockMarketInfoEntityService;
+  private final StockMarketInfoService stockMarketInfoEntityService;
   private final StockHolidayService stockHolidayService;
 
   /**

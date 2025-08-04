@@ -8,9 +8,9 @@ import picocli.CommandLine;
 import picocli.spring.PicocliSpringFactory;
 
 @SpringBootTest
-public class SyncStockMarketInfoEntityTest {
+public class SyncStockMarketInfoTest {
   @Autowired
-  private SyncStockMarketInfoEntityCommand syncStockMarketInfoEntityCommand;
+  private SyncStockMarketInfoCommand syncStockMarketInfoEntityCommand;
 
   @Autowired
   private PicocliSpringFactory picocliSpringFactory;
