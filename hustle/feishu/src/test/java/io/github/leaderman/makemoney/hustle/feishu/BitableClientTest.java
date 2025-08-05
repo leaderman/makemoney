@@ -41,6 +41,14 @@ public class BitableClientTest {
   }
 
   @Test
+  public void testListTableRecords() throws Exception {
+    List<AppTableRecord> records = bitableClient.listTableRecords("XGG1blHrkangStsSV82cvhi1n9d", "tblNB7kgiANos6TZ");
+    records.forEach(record -> {
+      System.out.println(record.getRecordId() + "\t" + record.getFields());
+    });
+  }
+
+  @Test
   public void testCreateRecord() throws Exception {
     AppTableRecord record = bitableClient.createRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
         Map.of("名称", "hustle.test.createRecord", "值", "createRecord"));
@@ -63,5 +71,15 @@ public class BitableClientTest {
     String aiOutput = bitableClient.getAiOutput("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
         record.getRecordId(), "说明", 10, 3);
     System.out.println(aiOutput);
+  }
+
+  @Test
+  public void testDeleteRecord() throws Exception {
+    bitableClient.deleteRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblNB7kgiANos6TZ", "recuRz2905jyLW");
+  }
+
+  @Test
+  public void testTruncateTable() throws Exception {
+    bitableClient.truncateTable("XGG1blHrkangStsSV82cvhi1n9d", "tblNB7kgiANos6TZ");
   }
 }

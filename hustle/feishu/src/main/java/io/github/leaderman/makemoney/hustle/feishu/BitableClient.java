@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -13,6 +15,9 @@ import org.springframework.stereotype.Component;
 import com.lark.oapi.service.bitable.v1.model.AppTable;
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 import com.lark.oapi.service.bitable.v1.model.AppTableView;
+import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordReq;
+import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordReqBody;
+import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReq;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReqBody;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordResp;
@@ -59,9 +64,9 @@ public class BitableClient {
           .pageToken(pageToken)
           .build();
 
-      limiterClient.acquire("feishu.bitable.listTables", 20, 60);
+      this.limiterClient.acquire("feishu.bitable.listTables", 20, 60);
 
-      ListAppTableResp resp = feishuClient.getClient().bitable().v1().appTable().list(req);
+      ListAppTableResp resp = this.feishuClient.getClient().bitable().v1().appTable().list(req);
       if (!resp.success()) {
         throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
       }
@@ -97,9 +102,9 @@ public class BitableClient {
           .pageToken(pageToken)
           .build();
 
-      limiterClient.acquire("feishu.bitable.listViews", 20, 60);
+      this.limiterClient.acquire("feishu.bitable.listViews", 20, 60);
 
-      ListAppTableViewResp resp = feishuClient.getClient().bitable().v1().appTableView().list(req);
+      ListAppTableViewResp resp = this.feishuClient.getClient().bitable().v1().appTableView().list(req);
       if (!resp.success()) {
         throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
       }
@@ -112,6 +117,52 @@ public class BitableClient {
     }
 
     return views;
+  }
+
+  /**
+   * 列出多维表格的数据表的视图的所有记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @return 所有记录。
+   * @throws Exception
+   */
+  public List<AppTableRecord> listTableRecords(String appToken, String tableId) throws Exception {
+    List<AppTableRecord> records = null;
+
+    boolean hasMore = true;
+    String pageToken = null;
+
+    while (hasMore) {
+      ListAppTableRecordReq req = ListAppTableRecordReq.newBuilder()
+          .appToken(appToken)
+          .tableId(tableId)
+          .pageToken(pageToken)
+          .build();
+
+      this.limiterClient.acquire("feishu.bitable.listRecords", 20, 60);
+
+      ListAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().list(req);
+      if (!resp.success()) {
+        throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+      }
+
+      ListAppTableRecordRespBody data = resp.getData();
+
+      AppTableRecord[] items = data.getItems();
+      if (ArrayUtils.isNotEmpty(items)) {
+        if (Objects.isNull(records)) {
+          records = new ArrayList<>();
+        }
+
+        records.addAll(Arrays.asList(items));
+      }
+
+      hasMore = data.getHasMore();
+      pageToken = data.getPageToken();
+    }
+
+    return records;
   }
 
   /**
@@ -130,29 +181,8 @@ public class BitableClient {
     List<AppTableRecord> records = new ArrayList<>();
 
     for (AppTable table : tables) {
-      boolean hasMore = true;
-      String pageToken = null;
-
-      while (hasMore) {
-        ListAppTableRecordReq req = ListAppTableRecordReq.newBuilder()
-            .appToken(appToken)
-            .tableId(table.getTableId())
-            .pageToken(pageToken)
-            .build();
-
-        limiterClient.acquire("feishu.bitable.listRecords", 20, 60);
-
-        ListAppTableRecordResp resp = feishuClient.getClient().bitable().v1().appTableRecord().list(req);
-        if (!resp.success()) {
-          throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
-        }
-
-        ListAppTableRecordRespBody data = resp.getData();
-        records.addAll(Arrays.asList(data.getItems()));
-
-        hasMore = data.getHasMore();
-        pageToken = data.getPageToken();
-      }
+      List<AppTableRecord> tableRecords = listTableRecords(appToken, table.getTableId());
+      records.addAll(tableRecords);
     }
 
     return records;
@@ -174,9 +204,9 @@ public class BitableClient {
         .appTableRecord(AppTableRecord.newBuilder().fields(fields).build())
         .build();
 
-    limiterClient.acquire("feishu.bitable.createRecord", 50, 60);
+    this.limiterClient.acquire("feishu.bitable.createRecord", 50, 60);
 
-    CreateAppTableRecordResp resp = feishuClient.getClient().bitable().v1().appTableRecord().create(req);
+    CreateAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().create(req);
     if (!resp.success()) {
       throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
     }
@@ -202,9 +232,9 @@ public class BitableClient {
             .build())
         .build();
 
-    limiterClient.acquire("feishu.bitable.getRecord", 20, 60);
+    this.limiterClient.acquire("feishu.bitable.getRecord", 20, 60);
 
-    BatchGetAppTableRecordResp resp = feishuClient.getClient().bitable().v1().appTableRecord().batchGet(req);
+    BatchGetAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().batchGet(req);
     if (!resp.success()) {
       throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
     }
@@ -247,5 +277,71 @@ public class BitableClient {
     }
 
     throw new RuntimeException(String.format("获取 AI 输出超时：%s", recordId));
+  }
+
+  private void internalBatchDeleteRecords(String appToken, String tableId, List<String> recordIds) throws Exception {
+    BatchDeleteAppTableRecordReq req = BatchDeleteAppTableRecordReq.newBuilder()
+        .appToken(appToken)
+        .tableId(tableId)
+        .batchDeleteAppTableRecordReqBody(BatchDeleteAppTableRecordReqBody.newBuilder()
+            .records(recordIds.toArray(new String[0]))
+            .build())
+        .build();
+
+    this.limiterClient.acquire("feishu.bitable.batchDeleteRecords", 50, 1);
+
+    BatchDeleteAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().batchDelete(req);
+    if (!resp.success()) {
+      throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+    }
+  }
+
+  /**
+   * 批量删除多维表格的记录。
+   * 
+   * @param appToken  多维表格的唯一标识。
+   * @param tableId   数据表的唯一标识。
+   * @param recordIds 记录的唯一标识列表。
+   * @throws Exception
+   */
+  public void batchDeleteRecords(String appToken, String tableId, List<String> recordIds) throws Exception {
+    int batchSize = 500;
+    int total = recordIds.size();
+
+    for (int from = 0; from < total; from += batchSize) {
+      int to = Math.min(from + batchSize, total);
+
+      List<String> batch = recordIds.subList(from, to);
+      this.internalBatchDeleteRecords(appToken, tableId, batch);
+    }
+  }
+
+  /**
+   * 删除多维表格的记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @param recordId 记录的唯一标识。
+   * @throws Exception
+   */
+  public void deleteRecord(String appToken, String tableId, String recordId) throws Exception {
+    this.batchDeleteRecords(appToken, tableId, Collections.singletonList(recordId));
+  }
+
+  /**
+   * 清空多维表格的数据表。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @throws Exception
+   */
+  public void truncateTable(String appToken, String tableId) throws Exception {
+    List<AppTableRecord> records = listTableRecords(appToken, tableId);
+    if (CollectionUtils.isEmpty(records)) {
+      return;
+    }
+
+    List<String> recordIds = records.stream().map(AppTableRecord::getRecordId).collect(Collectors.toList());
+    this.batchDeleteRecords(appToken, tableId, recordIds);
   }
 }

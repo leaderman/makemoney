@@ -22,7 +22,7 @@ import picocli.CommandLine.Command;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Command(name = "AnalyzeStockTrend", description = "分析股票趋势")
+@Command(name = "AnalyzeStockTrend", description = "分析股票趋势", mixinStandardHelpOptions = true)
 public class AnalyzeStockTrendCommand implements Runnable {
   private final StockService stockService;
   private final StockMarketInfoService stockMarketInfoService;
