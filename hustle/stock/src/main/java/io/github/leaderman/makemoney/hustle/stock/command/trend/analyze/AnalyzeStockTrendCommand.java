@@ -9,8 +9,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Component;
 
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockEntity;
-import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockMarketInfoEntity;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockTrendEntity;
+import io.github.leaderman.makemoney.hustle.stock.domain.model.StockMarketInfoModel;
 import io.github.leaderman.makemoney.hustle.stock.service.StockMarketInfoService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockTrendService;
@@ -230,14 +230,14 @@ public class AnalyzeStockTrendCommand implements Runnable {
           log.info("规则：{}", rule.getName());
 
           log.info("获取最近 {} 天的行情", rule.getDays());
-          List<StockMarketInfoEntity> stockMarketInfos = this.stockMarketInfoService.getLatest(stock.getCode(),
+          List<StockMarketInfoModel> stockMarketInfos = this.stockMarketInfoService.getLatest(stock.getCode(),
               rule.getDays());
           if (stockMarketInfos.size() != rule.getDays()) {
             log.info("行情数量 {} 不匹配，跳过", rule.getDays());
             continue;
           }
 
-          List<BigDecimal> prices = stockMarketInfos.stream().map(StockMarketInfoEntity::getClose).toList();
+          List<BigDecimal> prices = stockMarketInfos.stream().map(StockMarketInfoModel::getClose).toList();
           log.info("价格：{}", prices);
 
           boolean match = rule.match(prices);

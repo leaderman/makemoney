@@ -16,7 +16,7 @@ import io.github.leaderman.makemoney.hustle.coze.workflow.stock.MarketInfo;
 import io.github.leaderman.makemoney.hustle.coze.workflow.stock.StockData;
 import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockEntity;
-import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockMarketInfoEntity;
+import io.github.leaderman.makemoney.hustle.stock.domain.model.StockMarketInfoModel;
 import io.github.leaderman.makemoney.hustle.stock.service.StockHolidayService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockMarketInfoService;
 import io.github.leaderman.makemoney.hustle.stock.service.StockService;
@@ -61,8 +61,8 @@ public class SyncStockMarketInfoCommand implements Runnable {
     return this.executor.submit(() -> {
       try {
         // 获取股票市场信息（DB）
-        StockMarketInfoEntity stockMarketInfoEntity = stockMarketInfoEntityService.get(stock.getCode(), date);
-        if (Objects.nonNull(stockMarketInfoEntity) && !this.overwrite) {
+        StockMarketInfoModel stockMarketInfoModel = stockMarketInfoEntityService.get(stock.getCode(), date);
+        if (Objects.nonNull(stockMarketInfoModel) && !this.overwrite) {
           log.info("跳过股票市场信息（{}/{}）：{} {} {}", current, total, stock.getCode(), stock.getName(), date);
           return;
         }
@@ -84,38 +84,38 @@ public class SyncStockMarketInfoCommand implements Runnable {
         // 标识新增或更新
         boolean isNew = false;
 
-        if (Objects.isNull(stockMarketInfoEntity)) {
+        if (Objects.isNull(stockMarketInfoModel)) {
           isNew = true;
-          stockMarketInfoEntity = new StockMarketInfoEntity();
+          stockMarketInfoModel = new StockMarketInfoModel();
         }
 
         // 设置字段
-        stockMarketInfoEntity.setCode(stock.getCode());
-        stockMarketInfoEntity.setDay(date);
-        stockMarketInfoEntity.setAmount(marketInfo.getAmountDecimal());
-        stockMarketInfoEntity.setChange(marketInfo.getChangeDecimal());
-        stockMarketInfoEntity.setClose(marketInfo.getCloseDecimal());
-        stockMarketInfoEntity.setCurrencyCode(marketInfo.getCurrencyCode());
-        stockMarketInfoEntity.setCurrencyName(marketInfo.getCurrencyName());
-        stockMarketInfoEntity.setHigh(marketInfo.getHighDecimal());
-        stockMarketInfoEntity.setJumpLink(marketInfo.getJumpLink());
-        stockMarketInfoEntity.setLow(marketInfo.getLowDecimal());
-        stockMarketInfoEntity.setOpen(marketInfo.getOpenDecimal());
-        stockMarketInfoEntity.setPercent(marketInfo.getPercentDecimal());
-        stockMarketInfoEntity.setPreClose(marketInfo.getPreCloseDecimal());
-        stockMarketInfoEntity.setPrice(marketInfo.getPriceDecimal());
-        stockMarketInfoEntity.setVolume(marketInfo.getVolumeDecimal());
+        stockMarketInfoModel.setCode(stock.getCode());
+        stockMarketInfoModel.setDay(date);
+        stockMarketInfoModel.setAmount(marketInfo.getAmountDecimal());
+        stockMarketInfoModel.setChange(marketInfo.getChangeDecimal());
+        stockMarketInfoModel.setClose(marketInfo.getCloseDecimal());
+        stockMarketInfoModel.setCurrencyCode(marketInfo.getCurrencyCode());
+        stockMarketInfoModel.setCurrencyName(marketInfo.getCurrencyName());
+        stockMarketInfoModel.setHigh(marketInfo.getHighDecimal());
+        stockMarketInfoModel.setJumpLink(marketInfo.getJumpLink());
+        stockMarketInfoModel.setLow(marketInfo.getLowDecimal());
+        stockMarketInfoModel.setOpen(marketInfo.getOpenDecimal());
+        stockMarketInfoModel.setPercent(marketInfo.getPercentDecimal());
+        stockMarketInfoModel.setPreClose(marketInfo.getPreCloseDecimal());
+        stockMarketInfoModel.setPrice(marketInfo.getPriceDecimal());
+        stockMarketInfoModel.setVolume(marketInfo.getVolumeDecimal());
 
         if (isNew) {
           // 新增
-          stockMarketInfoEntityService.save(stockMarketInfoEntity);
+          stockMarketInfoEntityService.save(stockMarketInfoModel);
           log.info("新增股票市场信息（{}/{}）：{} {} {} {}", current, total, stock.getCode(), stock.getName(), date,
-              stockMarketInfoEntity.getPrice());
+              stockMarketInfoModel.getPrice());
         } else {
           // 更新
-          stockMarketInfoEntityService.updateById(stockMarketInfoEntity);
+          stockMarketInfoEntityService.updateById(stockMarketInfoModel);
           log.info("更新股票市场信息（{}/{}）：{} {} {} {}", current, total, stock.getCode(), stock.getName(), date,
-              stockMarketInfoEntity.getPrice());
+              stockMarketInfoModel.getPrice());
         }
       } catch (Exception e) {
         log.error("同步股票市场信息错误（{}/{}）：{} {} {} {}", current, total, stock.getCode(), stock.getName(), date,

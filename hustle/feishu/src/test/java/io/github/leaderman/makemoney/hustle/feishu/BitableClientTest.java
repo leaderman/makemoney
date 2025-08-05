@@ -18,7 +18,7 @@ public class BitableClientTest {
 
   @Test
   public void testListTables() throws Exception {
-    List<AppTable> tables = bitableClient.listTables("XGG1blHrkangStsSV82cvhi1n9d");
+    List<AppTable> tables = bitableClient.listTables("EwoAbpVJnavJpfsOqL5caBLNnPh");
     tables.forEach(table -> {
       System.out.println(table.getTableId() + "\t" + table.getName());
     });

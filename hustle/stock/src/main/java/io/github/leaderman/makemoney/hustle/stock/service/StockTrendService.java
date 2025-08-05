@@ -1,6 +1,7 @@
 package io.github.leaderman.makemoney.hustle.stock.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockTrendEntity;
+import io.github.leaderman.makemoney.hustle.stock.domain.model.StockTrendModel;
 import io.github.leaderman.makemoney.hustle.stock.mapper.StockTrendMapper;
 
 @Service
@@ -37,7 +39,8 @@ public class StockTrendService extends ServiceImpl<StockTrendMapper, StockTrendE
    * @param trend 趋势。
    * @return 股票趋势列表。
    */
-  public List<StockTrendEntity> list(String trend) {
-    return this.list(new LambdaQueryWrapper<StockTrendEntity>().eq(StockTrendEntity::getTrend, trend));
+  public List<StockTrendModel> gets(String trend) {
+    return this.list(new LambdaQueryWrapper<StockTrendEntity>().eq(StockTrendEntity::getTrend, trend)).stream()
+        .map(StockTrendModel::from).collect(Collectors.toList());
   }
 }
