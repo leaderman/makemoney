@@ -30,4 +30,14 @@ public class StockTrendService extends ServiceImpl<StockTrendMapper, StockTrendE
   public List<String> getTrends() {
     return this.listObjs(new QueryWrapper<StockTrendEntity>().select("DISTINCT trend"));
   }
+
+  /**
+   * 根据趋势获取股票趋势列表。
+   * 
+   * @param trend 趋势。
+   * @return 股票趋势列表。
+   */
+  public List<StockTrendEntity> list(String trend) {
+    return this.list(new LambdaQueryWrapper<StockTrendEntity>().eq(StockTrendEntity::getTrend, trend));
+  }
 }

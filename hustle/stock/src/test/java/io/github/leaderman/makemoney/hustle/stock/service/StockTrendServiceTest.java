@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockTrendEntity;
+
 @SpringBootTest
 public class StockTrendServiceTest {
   @Autowired
@@ -14,6 +16,12 @@ public class StockTrendServiceTest {
   @Test
   public void testGetTrends() {
     List<String> trends = stockTrendService.getTrends();
+    trends.forEach(System.out::println);
+  }
+
+  @Test
+  public void testList() {
+    List<StockTrendEntity> trends = stockTrendService.list("tu");
     trends.forEach(System.out::println);
   }
 }
