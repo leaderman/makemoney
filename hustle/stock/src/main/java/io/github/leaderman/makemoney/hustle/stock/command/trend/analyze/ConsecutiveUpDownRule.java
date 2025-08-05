@@ -5,8 +5,10 @@ import java.util.List;
 
 import io.github.leaderman.makemoney.hustle.lang.CollectionUtil;
 import io.github.leaderman.makemoney.hustle.lang.MathUtil;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+@Data
 @RequiredArgsConstructor
 public class ConsecutiveUpDownRule implements StockTrendRule {
   private final int upDays;

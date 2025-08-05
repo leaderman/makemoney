@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Component;
 
@@ -46,11 +45,7 @@ public class SyncStockTrendCommand implements Runnable {
         log.info("股票趋势名称({}/{})：{}", (index + 1), trends.size(), trend);
 
         // 数据表
-        String tableId = configClient.getString("stock.trend.bitable.table." + trend, "");
-        if (StringUtils.isEmpty(tableId)) {
-          log.error("股票趋势 {} 多维表格数据表为空", trend);
-          continue;
-        }
+        String tableId = configClient.getString("stock.trend.bitable.table." + trend);
 
         // 股票趋势列表
         List<StockTrendModel> stockTrends = stockTrendService.gets(trend);
