@@ -1,8 +1,11 @@
 package io.github.leaderman.makemoney.hustle.stock.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import io.github.leaderman.makemoney.hustle.stock.domain.entity.StockTrendEntity;
@@ -17,5 +20,14 @@ public class StockTrendService extends ServiceImpl<StockTrendMapper, StockTrendE
    */
   public void remove(String code) {
     this.remove(new LambdaQueryWrapper<StockTrendEntity>().eq(StockTrendEntity::getCode, code));
+  }
+
+  /**
+   * 获取所有趋势。
+   * 
+   * @return 所有趋势。
+   */
+  public List<String> getTrends() {
+    return this.listObjs(new QueryWrapper<StockTrendEntity>().select("DISTINCT trend"));
   }
 }
