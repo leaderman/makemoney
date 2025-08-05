@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 import com.lark.oapi.service.bitable.v1.model.AppTable;
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 import com.lark.oapi.service.bitable.v1.model.AppTableView;
+import com.lark.oapi.service.bitable.v1.model.BatchCreateAppTableRecordReq;
+import com.lark.oapi.service.bitable.v1.model.BatchCreateAppTableRecordReqBody;
+import com.lark.oapi.service.bitable.v1.model.BatchCreateAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordReq;
 import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordReqBody;
 import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordResp;
@@ -204,7 +207,7 @@ public class BitableClient {
         .appTableRecord(AppTableRecord.newBuilder().fields(fields).build())
         .build();
 
-    this.limiterClient.acquire("feishu.bitable.createRecord", 50, 60);
+    this.limiterClient.acquire("feishu.bitable.createRecord", 50, 1);
 
     CreateAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().create(req);
     if (!resp.success()) {
@@ -212,6 +215,58 @@ public class BitableClient {
     }
 
     return resp.getData().getRecord();
+  }
+
+  private List<AppTableRecord> internalBatchCreateRecords(String appToken, String tableId,
+      List<Map<String, Object>> records)
+      throws Exception {
+    AppTableRecord[] appTableRecords = records.stream()
+        .map(record -> AppTableRecord.newBuilder().fields(record).build())
+        .toArray(AppTableRecord[]::new);
+
+    BatchCreateAppTableRecordReq req = BatchCreateAppTableRecordReq.newBuilder()
+        .appToken(appToken)
+        .tableId(tableId)
+        .batchCreateAppTableRecordReqBody(BatchCreateAppTableRecordReqBody.newBuilder()
+            .records(appTableRecords)
+            .build())
+        .build();
+
+    this.limiterClient.acquire("feishu.bitable.batchCreateRecords", 50, 1);
+
+    BatchCreateAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().batchCreate(req);
+    if (!resp.success()) {
+      throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+    }
+
+    return Arrays.asList(resp.getData().getRecords());
+  }
+
+  /**
+   * 批量创建多维表格的记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @param records  记录列表。
+   * @return 创建的记录列表。
+   * @throws Exception
+   */
+  public List<AppTableRecord> batchCreateRecords(String appToken, String tableId, List<Map<String, Object>> records)
+      throws Exception {
+    int batchSize = 1000;
+    int total = records.size();
+
+    List<AppTableRecord> createdRecords = new ArrayList<>();
+
+    for (int from = 0; from < total; from += batchSize) {
+      int to = Math.min(from + batchSize, total);
+
+      List<Map<String, Object>> batch = records.subList(from, to);
+      List<AppTableRecord> createdBatch = this.internalBatchCreateRecords(appToken, tableId, batch);
+      createdRecords.addAll(createdBatch);
+    }
+
+    return createdRecords;
   }
 
   /**

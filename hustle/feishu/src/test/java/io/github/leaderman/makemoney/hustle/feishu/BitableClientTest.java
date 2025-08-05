@@ -56,6 +56,15 @@ public class BitableClientTest {
   }
 
   @Test
+  public void testBatchCreateRecords() throws Exception {
+    List<AppTableRecord> records = bitableClient.batchCreateRecords("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
+        List.of(Map.of("名称", "hustle.test.batchCreateRecords", "值", "batchCreateRecords")));
+    records.forEach(record -> {
+      System.out.println(record.getRecordId() + "\t" + record.getFields());
+    });
+  }
+
+  @Test
   public void testGetRecord() throws Exception {
     AppTableRecord record = bitableClient.getRecord("XGG1blHrkangStsSV82cvhi1n9d", "tblnxanpg2zpK9qn",
         "recuRFdbaLSkc2");
