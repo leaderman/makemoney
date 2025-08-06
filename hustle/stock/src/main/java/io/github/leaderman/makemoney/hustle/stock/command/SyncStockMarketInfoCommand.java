@@ -28,7 +28,7 @@ import picocli.CommandLine.Option;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Command(name = "SyncStockMarketInfoEntity", description = "同步股票市场信息", mixinStandardHelpOptions = true)
+@Command(name = "SyncStockMarketInfo", description = "同步股票市场信息", mixinStandardHelpOptions = true)
 public class SyncStockMarketInfoCommand implements Runnable {
   @Option(names = { "-d", "--day" }, description = "日期，格式：yyyy-MM-dd")
   private String day;
@@ -44,6 +44,9 @@ public class SyncStockMarketInfoCommand implements Runnable {
 
   @Option(names = { "-o", "--overwrite" }, description = "是否覆盖", defaultValue = "false")
   private boolean overwrite;
+
+  @Option(names = { "-r", "--retries" }, description = "重试次数", defaultValue = "3")
+  private int retries;
 
   private final CozeClient cozeClient;
   private final StockService stockService;
@@ -67,17 +70,37 @@ public class SyncStockMarketInfoCommand implements Runnable {
           return;
         }
 
-        // 获取股票数据
-        StockData stockData = cozeClient.getStockData(stock.getCode(), date);
-        if (Objects.isNull(stockData)) {
-          log.warn("获取股票市场信息为空（{}/{}）：{} {} {}", current, total, stock.getCode(), stock.getName(), date);
-          return;
+        MarketInfo marketInfo = null;
+
+        for (int retry = 0; retry < this.retries; retry++) {
+          // 获取股票数据
+          StockData stockData;
+
+          try {
+            stockData = cozeClient.getStockData(stock.getCode(), date);
+            if (stockData == null) {
+              log.warn("获取股票数据为空（{}/{}）：{} {} {}，重试：{}/{}", current, total, stock.getCode(), stock.getName(), date,
+                  retry + 1, this.retries);
+              continue;
+            }
+          } catch (Exception e) {
+            log.error("获取股票数据错误：{}", ExceptionUtils.getStackTrace(e));
+            continue;
+          }
+
+          // 获取股票市场信息（Coze）
+          marketInfo = stockData.getMarketInfo();
+          if (marketInfo == null) {
+            log.warn("获取股票市场信息为空（{}/{}）：{} {} {}，重试：{}/{}", current, total, stock.getCode(), stock.getName(),
+                date, retry + 1, this.retries);
+            continue;
+          }
+
+          break;
         }
 
-        // 获取股票市场信息（Coze）
-        MarketInfo marketInfo = stockData.getMarketInfo();
-        if (Objects.isNull(marketInfo)) {
-          log.warn("获取股票市场信息为空（{}/{}）：{} {} {}", current, total, stock.getCode(), stock.getName(), date);
+        if (marketInfo == null) {
+          log.error("获取股票市场信息失败（{}/{}）：{} {} {}", current, total, stock.getCode(), stock.getName(), date);
           return;
         }
 
