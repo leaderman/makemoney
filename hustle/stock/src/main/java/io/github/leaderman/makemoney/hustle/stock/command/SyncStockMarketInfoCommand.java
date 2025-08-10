@@ -84,7 +84,8 @@ public class SyncStockMarketInfoCommand implements Runnable {
               continue;
             }
           } catch (Exception e) {
-            log.error("获取股票数据错误：{}", ExceptionUtils.getStackTrace(e));
+            log.error("获取股票数据错误（{}/{}）：{} {} {}，重试：{}/{}，{}", current, total, stock.getCode(), stock.getName(),
+                date, retry + 1, this.retries, ExceptionUtils.getStackTrace(e));
             continue;
           }
 
