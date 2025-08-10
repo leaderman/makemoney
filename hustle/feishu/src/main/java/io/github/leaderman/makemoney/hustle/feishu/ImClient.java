@@ -66,6 +66,18 @@ public class ImClient {
   }
 
   /**
+   * 发送消息卡片。
+   * 
+   * @param openId 用户 ID。
+   * @param json   消息卡片 JSON。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendInteractiveMessageByOpenId(String openId, String json) throws Exception {
+    return this.createMessage("open_id", openId, "interactive", json);
+  }
+
+  /**
    * 发送文本消息。
    * 
    * @param chatId 群 ID。
@@ -75,5 +87,17 @@ public class ImClient {
    */
   public String sendTextMessageByChatId(String chatId, String text) throws Exception {
     return this.createMessage("chat_id", chatId, "text", this.objectMapper.writeValueAsString(Map.of("text", text)));
+  }
+
+  /**
+   * 发送消息卡片。
+   * 
+   * @param chatId 群 ID。
+   * @param json   消息卡片 JSON。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendInteractiveMessageByChatId(String chatId, String json) throws Exception {
+    return this.createMessage("chat_id", chatId, "interactive", json);
   }
 }
