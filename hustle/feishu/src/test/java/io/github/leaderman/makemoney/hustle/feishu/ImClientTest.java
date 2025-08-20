@@ -75,4 +75,28 @@ public class ImClientTest {
     messageId = this.imClient.sendInteractiveMessageByChatId("oc_bc40aeadb8d45002314eca8c5f07e55a", json);
     System.out.println(messageId);
   }
+
+  @Test
+  public void sendDebugMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendDebugMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "调试标题", "调试内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendInfoMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendInfoMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "信息标题", "信息内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendWarnMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendWarnMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "警告标题", "警告内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendErrorMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendErrorMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "错误标题", "错误内容");
+    System.out.println(messageId);
+  }
 }

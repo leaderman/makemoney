@@ -89,6 +89,109 @@ public class ImClient {
     return this.createMessage("chat_id", chatId, "text", this.objectMapper.writeValueAsString(Map.of("text", text)));
   }
 
+  private String buildLogMessage(String title, String content, String color) {
+    String template = """
+        {
+            "schema": "2.0",
+            "config": {
+                "update_multi": true,
+                "style": {
+                    "text_size": {
+                        "normal_v2": {
+                            "default": "normal",
+                            "pc": "normal",
+                            "mobile": "heading"
+                        }
+                    }
+                }
+            },
+            "body": {
+                "direction": "vertical",
+                "padding": "12px 12px 12px 12px",
+                "elements": [
+                    {
+                        "tag": "div",
+                        "text": {
+                            "tag": "plain_text",
+                            "content": "%s",
+                            "text_size": "normal_v2",
+                            "text_align": "left",
+                            "text_color": "default"
+                        },
+                        "margin": "0px 0px 0px 0px"
+                    }
+                ]
+            },
+            "header": {
+                "title": {
+                    "tag": "plain_text",
+                    "content": "%s"
+                },
+                "subtitle": {
+                    "tag": "plain_text",
+                    "content": ""
+                },
+                "template": "%s",
+                "padding": "12px 12px 12px 12px"
+            }
+        }
+        """;
+
+    return String.format(template, content, title, color);
+  }
+
+  /**
+   * 发送调试消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendDebugMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByOpenId(openId, this.buildLogMessage(title, content, "blue"));
+  }
+
+  /**
+   * 发送信息消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendInfoMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByOpenId(openId, this.buildLogMessage(title, content, "green"));
+  }
+
+  /**
+   * 发送警告消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendWarnMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByOpenId(openId, this.buildLogMessage(title, content, "yellow"));
+  }
+
+  /**
+   * 发送错误消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendErrorMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByOpenId(openId, this.buildLogMessage(title, content, "red"));
+  }
+
   /**
    * 发送消息卡片。
    * 
