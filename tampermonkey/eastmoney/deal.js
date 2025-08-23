@@ -23,40 +23,34 @@ function getDeals() {
   const trs = window.mm.all(document, "#tabBody > tr");
 
   for (const tr of trs) {
+    const tds = window.mm.all(tr, "td");
+    if (tds.length === 1) {
+      // 暂无数据...
+      continue;
+    }
+
     // 成交时间。
-    const executionTime = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(1)")
-    );
+    const executionTime = window.mm.textOf(tds[0]);
     // 证券代码。
-    const securityCode = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(2) > a")
-    );
+    const securityCode = window.mm.textOf(window.mm.one(tds[1], "a"));
     // 证券名称。
-    const securityName = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(3) > a")
-    );
+    const securityName = window.mm.textOf(window.mm.one(tds[2], "a"));
     // 委托方向。
-    const orderSide = window.mm.textOf(window.mm.one(tr, "td:nth-child(4)"));
+    const orderSide = window.mm.textOf(tds[3]);
     // 成交数量。
-    const executedQuantity = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(5)")
-    );
+    const executedQuantity = window.mm.textOf(tds[4]);
     // 成交价格。
-    const executedPrice = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(6)")
-    );
+    const executedPrice = window.mm.textOf(tds[5]);
     // 成交金额。
-    const executedAmount = window.mm.textOf(
-      window.mm.one(tr, "td:nth-child(7)")
-    );
+    const executedAmount = window.mm.textOf(tds[6]);
     // 委托编号。
-    const orderId = window.mm.textOf(window.mm.one(tr, "td:nth-child(8)"));
+    const orderId = window.mm.textOf(tds[7]);
     // 成交编号。
-    const executionId = window.mm.textOf(window.mm.one(tr, "td:nth-child(9)"));
+    const executionId = window.mm.textOf(tds[8]);
     // 交易市场。
-    const market = window.mm.textOf(window.mm.one(tr, "td:nth-child(10)"));
+    const market = window.mm.textOf(tds[9]);
     // 币种。
-    const currency = window.mm.textOf(window.mm.one(tr, "td:nth-child(11)"));
+    const currency = window.mm.textOf(tds[10]);
 
     deals.push({
       executionTime,

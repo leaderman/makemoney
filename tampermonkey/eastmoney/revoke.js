@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Orders
+// @name         Revoke
 // @namespace    MakeMoney
 // @version      2025-08-23
-// @description  东方财富当日委托
-// @match        https://jywg.18.cn/Search/Orders
+// @description  东方财富撤单
+// @match        https://jywg.18.cn/Trade/Revoke
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
 // ==/UserScript==
 
@@ -14,11 +14,11 @@
 })();
 
 /**
- * 获取委托列表。
- * @returns {Array<Object>} 委托列表。
+ * 获取撤单列表。
+ * @returns {Array<Object>} 撤单列表。
  */
-function getOrders() {
-  const orders = [];
+function getRevokes() {
+  const revokes = [];
 
   const trs = window.mm.all(document, "#tabBody > tr");
 
@@ -30,33 +30,31 @@ function getOrders() {
     }
 
     // 委托时间。
-    const orderTime = window.mm.textOf(tds[0]);
+    const orderTime = window.mm.textOf(tds[1]);
     // 证券代码。
-    const orderType = window.mm.textOf(window.mm.one(tds[1], "a"));
+    const securityCode = window.mm.textOf(window.mm.one(tds[2], "a"));
     // 证券名称。
-    const securityName = window.mm.textOf(window.mm.one(tds[2], "a"));
+    const securityName = window.mm.textOf(window.mm.one(tds[3], "a"));
     // 委托方向。
-    const orderSide = window.mm.textOf(tds[3]);
+    const orderSide = window.mm.textOf(tds[4]);
     // 委托数量。
-    const orderQuantity = window.mm.textOf(tds[4]);
+    const orderQuantity = window.mm.textOf(tds[5]);
     // 委托状态。
-    const orderStatus = window.mm.textOf(tds[5]);
+    const orderStatus = window.mm.textOf(tds[6]);
     // 委托价格。
-    const orderPrice = window.mm.textOf(tds[6]);
+    const orderPrice = window.mm.textOf(tds[7]);
     // 成交数量。
-    const filledQuantity = window.mm.textOf(tds[7]);
+    const filledQuantity = window.mm.textOf(tds[8]);
     // 成交金额。
-    const filledAmount = window.mm.textOf(tds[8]);
+    const filledAmount = window.mm.textOf(tds[9]);
     // 成交价格。
-    const avgFilledPrice = window.mm.textOf(tds[9]);
+    const avgFilledPrice = window.mm.textOf(tds[10]);
     // 委托编号。
-    const orderId = window.mm.textOf(tds[10]);
-    // 币种。
-    const currency = window.mm.textOf(tds[11]);
+    const orderId = window.mm.textOf(tds[11]);
 
-    orders.push({
+    revokes.push({
       orderTime,
-      orderType,
+      securityCode,
       securityName,
       orderSide,
       orderQuantity,
@@ -66,11 +64,10 @@ function getOrders() {
       filledAmount,
       avgFilledPrice,
       orderId,
-      currency,
     });
   }
 
-  return orders;
+  return revokes;
 }
 
 /**
@@ -99,44 +96,42 @@ async function waitForData() {
 
 async function main() {
   // 等待数据。
-  console.log("等待当日委托数据...");
+  console.log("等待撤单数据...");
   await waitForData();
-  console.log("当日委托数据已就绪");
+  console.log("撤单数据已就绪");
 
   // 获取委托列表。
-  const orders = getOrders();
-  console.log("委托列表：", orders.length);
+  const revokes = getRevokes();
+  console.log("撤单列表：", revokes.length);
 
-  for (const order of orders) {
+  for (const revoke of revokes) {
     console.log(
       "委托时间：",
-      order.orderTime,
+      revoke.orderTime,
       "，证券代码：",
-      order.orderType,
+      revoke.securityCode,
       "，证券名称：",
-      order.securityName,
+      revoke.securityName,
       "，委托方向：",
-      order.orderSide,
+      revoke.orderSide,
       "，委托数量：",
-      order.orderQuantity,
+      revoke.orderQuantity,
       "，委托状态：",
-      order.orderStatus,
+      revoke.orderStatus,
       "，委托价格：",
-      order.orderPrice,
+      revoke.orderPrice,
       "，成交数量：",
-      order.filledQuantity,
+      revoke.filledQuantity,
       "，成交金额：",
-      order.filledAmount,
+      revoke.filledAmount,
       "，成交价格：",
-      order.avgFilledPrice,
+      revoke.avgFilledPrice,
       "，委托编号：",
-      order.orderId,
-      "，币种：",
-      order.currency
+      revoke.orderId
     );
   }
 
-  console.log("当日委托数据解析完成");
+  console.log("撤单数据解析完成");
 
   // 等待页面重新加载
   console.log("等待页面重新加载...");
