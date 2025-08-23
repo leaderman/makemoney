@@ -15,7 +15,7 @@
 
 /**
  * 获取委托列表。
- * @returns {Array<Object>} 证券列表。
+ * @returns {Array<Object>} 委托列表。
  */
 function getOrders() {
   const orders = [];
