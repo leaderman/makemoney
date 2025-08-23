@@ -107,46 +107,36 @@ function getSecurities() {
     const securityCode = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(1) > a")
     );
-
     // 证券名称。
     const securityName = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(2) > a")
     );
-
     // 持仓数量。
     const holdingQuantity = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(3)")
     );
-
     // 可用数量。
     const availableQuantity = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(4)")
     );
-
     // 成本价。
     const costPrice = window.mm.textOf(window.mm.one(tr, "td:nth-child(5)"));
-
     // 当前价。
     const currentPrice = window.mm.textOf(window.mm.one(tr, "td:nth-child(6)"));
-
     // 最新市值。
     const marketValue = window.mm.textOf(window.mm.one(tr, "td:nth-child(7)"));
-
     // 持仓盈亏。
     const positionProfitLoss = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(8)")
     );
-
     // 持仓盈亏比例。
     const positionProfitLossRatio = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(9)")
     );
-
     // 当日盈亏。
     const dailyProfitLoss = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(10)")
     );
-
     // 当日盈亏比例。
     const dailyProfitLossRatio = window.mm.textOf(
       window.mm.one(tr, "td:nth-child(11)")
