@@ -252,11 +252,10 @@ async function main() {
     );
   }
 
-  // 休眠
-  console.log("休眠...");
-  await window.mm.sleep(3000);
+  console.log("资金持仓数据解析完成");
 
-  // 重新加载
-  console.log("重新加载...");
+  // 等待页面重新加载
+  console.log("等待页面重新加载...");
+  await window.mm.sleep(3000);
   window.mm.reload();
 }
