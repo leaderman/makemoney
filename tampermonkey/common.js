@@ -46,3 +46,10 @@ window.mm.all = function (root, selector) {
 window.mm.one = function (root, selector) {
   return root.querySelector(selector);
 };
+
+/**
+ * 重新加载。
+ */
+window.mm.reload = function () {
+  location.reload();
+};

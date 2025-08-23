@@ -94,6 +94,83 @@ function getFrozenFunds() {
 }
 
 /**
+ * 获取证券列表。
+ * @returns {Array<Object>} 证券列表。
+ */
+function getSecurities() {
+  const securities = [];
+
+  const trs = window.mm.all(document, "#tabBody > tr");
+
+  for (const tr of trs) {
+    // 证券代码。
+    const securityCode = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(1) > a")
+    );
+
+    // 证券名称。
+    const securityName = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(2) > a")
+    );
+
+    // 持仓数量。
+    const holdingQuantity = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(3)")
+    );
+
+    // 可用数量。
+    const availableQuantity = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(4)")
+    );
+
+    // 成本价。
+    const costPrice = window.mm.textOf(window.mm.one(tr, "td:nth-child(5)"));
+
+    // 当前价。
+    const currentPrice = window.mm.textOf(window.mm.one(tr, "td:nth-child(6)"));
+
+    // 最新市值。
+    const marketValue = window.mm.textOf(window.mm.one(tr, "td:nth-child(7)"));
+
+    // 持仓盈亏。
+    const positionProfitLoss = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(8)")
+    );
+
+    // 持仓盈亏比例。
+    const positionProfitLossRatio = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(9)")
+    );
+
+    // 当日盈亏。
+    const dailyProfitLoss = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(10)")
+    );
+
+    // 当日盈亏比例。
+    const dailyProfitLossRatio = window.mm.textOf(
+      window.mm.one(tr, "td:nth-child(11)")
+    );
+
+    securities.push({
+      securityCode,
+      securityName,
+      holdingQuantity,
+      availableQuantity,
+      costPrice,
+      currentPrice,
+      marketValue,
+      positionProfitLoss,
+      positionProfitLossRatio,
+      dailyProfitLoss,
+      dailyProfitLossRatio,
+    });
+  }
+
+  return securities;
+}
+
+/**
  * 等待数据。
  */
 async function waitForData() {
@@ -107,10 +184,10 @@ async function waitForData() {
 }
 
 async function main() {
-  console.log("资金持仓脚本开始");
-
   // 等待数据。
+  console.log("等待资金持仓数据...");
   await waitForData();
+  console.log("资金持仓数据已就绪");
 
   // 获取总资产。
   const totalAssets = getTotalAssets();
@@ -144,5 +221,42 @@ async function main() {
   const frozenFunds = getFrozenFunds();
   console.log("冻结资金：", frozenFunds);
 
-  console.log("资金持仓脚本结束");
+  // 获取证券列表。
+  const securities = getSecurities();
+  console.log("证券列表：", securities.length);
+
+  for (const security of securities) {
+    console.log(
+      "证券代码：",
+      security.securityCode,
+      "，证券名称：",
+      security.securityName,
+      "，持仓数量：",
+      security.holdingQuantity,
+      "，可用数量：",
+      security.availableQuantity,
+      "，成本价：",
+      security.costPrice,
+      "，当前价：",
+      security.currentPrice,
+      "，最新市值：",
+      security.marketValue,
+      "，持仓盈亏：",
+      security.positionProfitLoss,
+      "，持仓盈亏比例：",
+      security.positionProfitLossRatio,
+      "，当日盈亏：",
+      security.dailyProfitLoss,
+      "，当日盈亏比例：",
+      security.dailyProfitLossRatio
+    );
+  }
+
+  // 休眠
+  console.log("休眠...");
+  await window.mm.sleep(3000);
+
+  // 重新加载
+  console.log("重新加载...");
+  window.mm.reload();
 }
