@@ -18,6 +18,7 @@
         <module>stock</module>
         <module>command</module>
         <module>lang</module>
+        <module>web</module>
     </modules>
 
     <parent>
