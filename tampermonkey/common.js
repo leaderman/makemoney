@@ -159,8 +159,6 @@ window.mm.post = function (url, data, headers = {}) {
             "X-Request-Id"
           );
 
-          console.log(requestId);
-
           if (response.status !== 200) {
             return reject(
               new Error(`请求 ID: ${requestId} 状态码异常: ${response.status}`)
