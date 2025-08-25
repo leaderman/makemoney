@@ -19,6 +19,7 @@
         <module>command</module>
         <module>lang</module>
         <module>web</module>
+        <module>eastmoney</module>
     </modules>
 
     <parent>

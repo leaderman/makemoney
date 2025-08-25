@@ -10,24 +10,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hustle-web</artifactId>
+    <artifactId>hustle-eastmoney</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.leaderman.makemoney</groupId>
             <artifactId>hustle-domain</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-eastmoney</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -36,15 +24,4 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
