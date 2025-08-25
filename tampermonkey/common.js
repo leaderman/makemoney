@@ -93,7 +93,7 @@ window.mm.get = function (url, headers = {}) {
         try {
           const requestId = window.mm._getHeader(
             response.responseHeaders,
-            "x-request-id"
+            "X-Request-Id"
           );
 
           if (response.status !== 200) {
@@ -156,8 +156,10 @@ window.mm.post = function (url, data, headers = {}) {
         try {
           const requestId = window.mm._getHeader(
             response.responseHeaders,
-            "x-request-id"
+            "X-Request-Id"
           );
+
+          console.log(requestId);
 
           if (response.status !== 200) {
             return reject(
