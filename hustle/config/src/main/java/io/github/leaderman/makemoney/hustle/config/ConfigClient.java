@@ -94,6 +94,16 @@ public class ConfigClient {
   }
 
   /**
+   * 获取配置项的值。
+   * 
+   * @param name 配置项名称
+   * @return 配置项的值
+   */
+  public String[] getStringArray(String name) {
+    return this.getString(name).lines().map(String::trim).toArray(String[]::new);
+  }
+
+  /**
    * 获取配置项的值，如果配置项不存在，则返回默认值。
    * 
    * @param name         配置项名称
@@ -102,6 +112,17 @@ public class ConfigClient {
    */
   public String getString(String name, String defaultValue) {
     return this.contains(name) ? this.getString(name) : defaultValue;
+  }
+
+  /**
+   * 获取配置项的值，如果配置项不存在，则返回默认值。
+   * 
+   * @param name         配置项名称
+   * @param defaultValue 默认值
+   * @return 配置项的值
+   */
+  public String[] getStringArray(String name, String[] defaultValue) {
+    return this.contains(name) ? this.getStringArray(name) : defaultValue;
   }
 
   /**

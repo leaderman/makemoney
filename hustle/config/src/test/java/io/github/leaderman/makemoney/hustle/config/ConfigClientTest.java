@@ -1,5 +1,7 @@
 package io.github.leaderman.makemoney.hustle.config;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ public class ConfigClientTest {
   @Test
   public void testGetValues() {
     String strVal = configClient.getString("hustle.test.string");
+    String[] strArrayVal = configClient.getStringArray("hustle.test.string.array");
     int intVal = configClient.getInt("hustle.test.int");
     long longVal = configClient.getLong("other.test.long");
     float floatVal = configClient.getFloat("hustle.test.float");
@@ -25,6 +28,7 @@ public class ConfigClientTest {
     boolean boolVal = configClient.getBoolean("hustle.test.boolean");
 
     System.out.println(strVal);
+    System.out.println(Arrays.toString(strArrayVal));
     System.out.println(intVal);
     System.out.println(longVal);
     System.out.println(floatVal);
@@ -35,6 +39,7 @@ public class ConfigClientTest {
   @Test
   public void testGetDefaultValues() {
     String strVal = configClient.getString("hustle.test.strin2g", "default");
+    String[] strArrayVal = configClient.getStringArray("hustle.test.string.array2", new String[] { "default" });
     int intVal = configClient.getInt("hustle.test.int2", 1);
     long longVal = configClient.getLong("other.test.long2", 2L);
     float floatVal = configClient.getFloat("hustle.test.float2", 3.0f);
@@ -42,6 +47,7 @@ public class ConfigClientTest {
     boolean boolVal = configClient.getBoolean("hustle.test.boolean2", true);
 
     System.out.println(strVal);
+    System.out.println(Arrays.toString(strArrayVal));
     System.out.println(intVal);
     System.out.println(longVal);
     System.out.println(floatVal);
