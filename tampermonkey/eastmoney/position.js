@@ -7,6 +7,9 @@
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
 // ==/UserScript==
 
+const URL = "xxx";
+const TOKEN = "xxx";
+
 (function () {
   "use strict";
 
@@ -243,6 +246,24 @@ async function main() {
   }
 
   console.log("资金持仓数据解析完成");
+
+  await window.mm.post(
+    URL,
+    {
+      totalAssets,
+      securitiesMarketValue,
+      availableFunds,
+      positionProfitLoss,
+      cashBalance,
+      withdrawableFunds,
+      dailyProfitLoss,
+      frozenFunds,
+      securities,
+    },
+    {
+      Authorization: "Bearer " + TOKEN,
+    }
+  );
 
   // 等待页面重新加载
   console.log("等待页面重新加载...");
