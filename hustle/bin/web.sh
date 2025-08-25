@@ -7,7 +7,7 @@ BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_DIR="$BASE_DIR/../../../makemoney-config"
 
 # jar 路径
-JAR_PATH="$BASE_DIR/../command/target/hustle-web.jar"
+JAR_PATH="$BASE_DIR/../web/target/hustle-web.jar"
 
 # 环境
 PROFILE="${MAKEMONEY_PROFILE:-default}"
