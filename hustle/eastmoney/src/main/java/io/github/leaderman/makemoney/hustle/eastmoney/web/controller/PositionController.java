@@ -22,7 +22,6 @@ public class PositionController {
 
   @PostMapping("/position/sync")
   public Response<Void> syncPosition(@RequestBody SyncPositionRequest request) {
-    log.info("同步资金持仓：{}", request);
     try {
       PositionModel model = PositionModel.from(request);
       positionService.sync(model);
