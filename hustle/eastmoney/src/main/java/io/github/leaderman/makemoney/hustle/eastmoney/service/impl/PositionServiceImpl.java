@@ -80,13 +80,13 @@ public class PositionServiceImpl implements PositionService {
     record.put("证券名称", security.getSecurityName());
     record.put("持仓数量", security.getHoldingQuantity());
     record.put("可用数量", security.getAvailableQuantity());
-    record.put("成本价", security.getCostPrice());
-    record.put("当前价", security.getCurrentPrice());
-    record.put("最新市值", security.getMarketValue());
-    record.put("持仓盈亏", security.getPositionProfitLoss());
-    record.put("持仓盈亏比例", security.getPositionProfitLossRatio());
-    record.put("当日盈亏", security.getDailyProfitLoss());
-    record.put("当日盈亏比例", security.getDailyProfitLossRatio());
+    record.put("成本价", security.getCostPrice().doubleValue());
+    record.put("当前价", security.getCurrentPrice().doubleValue());
+    record.put("最新市值", security.getMarketValue().doubleValue());
+    record.put("持仓盈亏", security.getPositionProfitLoss().doubleValue());
+    record.put("持仓盈亏比例", security.getPositionProfitLossRatio().doubleValue());
+    record.put("当日盈亏", security.getDailyProfitLoss().doubleValue());
+    record.put("当日盈亏比例", security.getDailyProfitLossRatio().doubleValue());
 
     return record;
   }
