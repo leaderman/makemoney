@@ -1,34 +1,34 @@
 package io.github.leaderman.makemoney.domain.request;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 import lombok.Data;
 
 @Data
 public class SyncPositionRequest {
-  private BigDecimal totalAssets;
-  // private BigDecimal securitiesMarketValue;
-  // private BigDecimal availableFunds;
-  // private BigDecimal positionProfitLoss;
-  // private BigDecimal cashBalance;
-  // private BigDecimal withdrawableFunds;
-  // private BigDecimal dailyProfitLoss;
-  // private BigDecimal frozenFunds;
+  private String totalAssets;
+  private String securitiesMarketValue;
+  private String availableFunds;
+  private String positionProfitLoss;
+  private String cashBalance;
+  private String withdrawableFunds;
+  private String dailyProfitLoss;
+  private String frozenFunds;
 
   @Data
   public static class Security {
     private String securityCode;
     private String securityName;
-    private Integer holdingQuantity;
-    private Integer availableQuantity;
-    private BigDecimal costPrice;
-    private BigDecimal currentPrice;
-    private BigDecimal marketValue;
-    private BigDecimal positionProfitLoss;
-    private BigDecimal positionProfitLossRatio;
-    private BigDecimal dailyProfitLoss;
-    private BigDecimal dailyProfitLossRatio;
+    private String holdingQuantity;
+    private String availableQuantity;
+    private String costPrice;
+    private String currentPrice;
+    private String marketValue;
+    private String positionProfitLoss;
+    private String positionProfitLossRatio;
+    private String dailyProfitLoss;
+    private String dailyProfitLossRatio;
   }
 
-  // private List<Security> securities;
+  private List<Security> securities;
 }
