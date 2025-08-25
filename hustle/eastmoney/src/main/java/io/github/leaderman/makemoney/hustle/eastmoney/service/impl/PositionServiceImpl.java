@@ -1,11 +1,14 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
@@ -70,13 +73,78 @@ public class PositionServiceImpl implements PositionService {
     this.bitableClient.batchUpdateRecords(this.bitable, this.positionTable, recordIds, records);
   }
 
-  private void syncSecurities(List<SecurityModel> securities) throws Exception {
-    Map<String, SecurityModel> leftRecords = securities.stream()
-        .collect(Collectors.toMap(SecurityModel::getSecurityCode, Function.identity()));
+  private Map<String, Object> toRecord(SecurityModel security) {
+    Map<String, Object> record = new HashMap<>();
 
+    record.put("证券代码", security.getSecurityCode());
+    record.put("证券名称", security.getSecurityName());
+    record.put("持仓数量", security.getHoldingQuantity());
+    record.put("可用数量", security.getAvailableQuantity());
+    record.put("成本价", security.getCostPrice());
+    record.put("当前价", security.getCurrentPrice());
+    record.put("最新市值", security.getMarketValue());
+    record.put("持仓盈亏", security.getPositionProfitLoss());
+    record.put("持仓盈亏比例", security.getPositionProfitLossRatio());
+    record.put("当日盈亏", security.getDailyProfitLoss());
+    record.put("当日盈亏比例", security.getDailyProfitLossRatio());
+
+    return record;
+  }
+
+  private void syncSecurities(List<SecurityModel> securities) throws Exception {
+    // 创建记录列表。
+    List<Map<String, Object>> createRecords = new ArrayList<>();
+
+    // 更新记录列表。
+    List<String> updateRecordIds = new ArrayList<>();
+    List<Map<String, Object>> updateRecords = new ArrayList<>();
+
+    // 删除记录列表。
+    List<String> deleteRecordIds = new ArrayList<>();
+
+    Map<String, SecurityModel> leftRecords = securities.stream()
+        .filter(security -> security.getHoldingQuantity() > 0)
+        .collect(Collectors.toMap(SecurityModel::getSecurityCode, Function.identity()));
     Map<String, AppTableRecord> rightRecords = this.bitableClient.listTableRecords(this.bitable, this.securitiesTable)
         .stream()
         .collect(Collectors.toMap(record -> (String) record.getFields().get("证券代码"), Function.identity()));
+
+    for (Entry<String, SecurityModel> entry : leftRecords.entrySet()) {
+      String securityCode = entry.getKey();
+      SecurityModel security = entry.getValue();
+
+      if (!rightRecords.containsKey(securityCode)) {
+        // 创建记录。
+        createRecords.add(toRecord(security));
+      } else {
+        // 更新记录。
+        updateRecordIds.add(rightRecords.get(securityCode).getRecordId());
+        updateRecords.add(toRecord(security));
+      }
+    }
+
+    for (Entry<String, AppTableRecord> entry : rightRecords.entrySet()) {
+      String securityCode = entry.getKey();
+      if (!leftRecords.containsKey(securityCode)) {
+        // 删除记录。
+        deleteRecordIds.add(entry.getValue().getRecordId());
+      }
+    }
+
+    if (CollectionUtils.isNotEmpty(createRecords)) {
+      // 创建。
+      this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, createRecords);
+    }
+
+    if (CollectionUtils.isNotEmpty(updateRecords)) {
+      // 更新。
+      this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, updateRecordIds, updateRecords);
+    }
+
+    if (CollectionUtils.isNotEmpty(deleteRecordIds)) {
+      // 删除。
+      this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, deleteRecordIds);
+    }
   }
 
   @Override
