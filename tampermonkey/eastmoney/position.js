@@ -5,6 +5,8 @@
 // @description  东方财富资金持仓
 // @match        https://jywg.18.cn/Search/Position
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
+// @connect      *
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 const URL = "xxx";
@@ -268,5 +270,5 @@ async function main() {
   // 等待页面重新加载
   console.log("等待页面重新加载...");
   await window.mm.sleep(3000);
-  window.mm.reload();
+  // window.mm.reload();
 }
