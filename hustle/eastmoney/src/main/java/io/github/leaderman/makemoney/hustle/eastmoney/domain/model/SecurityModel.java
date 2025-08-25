@@ -37,9 +37,20 @@ public class SecurityModel extends BaseModel {
     model.setCurrentPrice(NumberUtil.toBigDecimal(security.getCurrentPrice(), BigDecimal.ZERO));
     model.setMarketValue(NumberUtil.toBigDecimal(security.getMarketValue(), BigDecimal.ZERO));
     model.setPositionProfitLoss(NumberUtil.toBigDecimal(security.getPositionProfitLoss(), BigDecimal.ZERO));
-    model.setPositionProfitLossRatio(NumberUtil.toBigDecimal(security.getPositionProfitLossRatio(), BigDecimal.ZERO));
+
+    String positionProfitLossRatio = security.getPositionProfitLossRatio();
+    if (positionProfitLossRatio.endsWith("%")) {
+      positionProfitLossRatio = positionProfitLossRatio.substring(0, positionProfitLossRatio.length() - 1);
+    }
+    model.setPositionProfitLossRatio(NumberUtil.toBigDecimal(positionProfitLossRatio, BigDecimal.ZERO));
+
     model.setDailyProfitLoss(NumberUtil.toBigDecimal(security.getDailyProfitLoss(), BigDecimal.ZERO));
-    model.setDailyProfitLossRatio(NumberUtil.toBigDecimal(security.getDailyProfitLossRatio(), BigDecimal.ZERO));
+
+    String dailyProfitLossRatio = security.getDailyProfitLossRatio();
+    if (dailyProfitLossRatio.endsWith("%")) {
+      dailyProfitLossRatio = dailyProfitLossRatio.substring(0, dailyProfitLossRatio.length() - 1);
+    }
+    model.setDailyProfitLossRatio(NumberUtil.toBigDecimal(dailyProfitLossRatio, BigDecimal.ZERO));
 
     return model;
   }
