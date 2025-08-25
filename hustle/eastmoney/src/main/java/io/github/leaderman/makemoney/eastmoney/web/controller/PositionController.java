@@ -1,11 +1,11 @@
-package io.github.leaderman.makemoney.web.controller;
+package io.github.leaderman.makemoney.eastmoney.web.controller;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.github.leaderman.makemoney.domain.request.SyncPositionRequest;
+import io.github.leaderman.makemoney.eastmoney.domain.request.SyncPositionRequest;
 import io.github.leaderman.makemoney.hustle.domain.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

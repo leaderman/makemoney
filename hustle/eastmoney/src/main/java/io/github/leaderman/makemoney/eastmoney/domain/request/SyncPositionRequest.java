@@ -1,4 +1,4 @@
-package io.github.leaderman.makemoney.domain.request;
+package io.github.leaderman.makemoney.eastmoney.domain.request;
 
 import java.util.List;
 
