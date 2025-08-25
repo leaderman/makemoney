@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -24,6 +25,9 @@ import com.lark.oapi.service.bitable.v1.model.BatchDeleteAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReq;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordReqBody;
 import com.lark.oapi.service.bitable.v1.model.BatchGetAppTableRecordResp;
+import com.lark.oapi.service.bitable.v1.model.BatchUpdateAppTableRecordReq;
+import com.lark.oapi.service.bitable.v1.model.BatchUpdateAppTableRecordReqBody;
+import com.lark.oapi.service.bitable.v1.model.BatchUpdateAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.CreateAppTableRecordReq;
 import com.lark.oapi.service.bitable.v1.model.CreateAppTableRecordResp;
 import com.lark.oapi.service.bitable.v1.model.ListAppTableRecordReq;
@@ -398,5 +402,81 @@ public class BitableClient {
 
     List<String> recordIds = records.stream().map(AppTableRecord::getRecordId).collect(Collectors.toList());
     this.batchDeleteRecords(appToken, tableId, recordIds);
+  }
+
+  private List<AppTableRecord> internalBatchUpdateRecords(String appToken, String tableId,
+      List<String> recordIds, List<Map<String, Object>> records)
+      throws Exception {
+    AppTableRecord[] appTableRecords = IntStream.range(0, recordIds.size())
+        .mapToObj(index -> AppTableRecord.newBuilder().recordId(recordIds.get(index)).fields(records.get(index))
+            .build())
+        .toArray(AppTableRecord[]::new);
+
+    BatchUpdateAppTableRecordReq req = BatchUpdateAppTableRecordReq.newBuilder()
+        .appToken(appToken)
+        .tableId(tableId)
+        .batchUpdateAppTableRecordReqBody(BatchUpdateAppTableRecordReqBody.newBuilder()
+            .records(appTableRecords)
+            .build())
+        .build();
+
+    this.limiterClient.acquire("feishu.bitable.batchUpdateRecords", 50, 1);
+
+    BatchUpdateAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().batchUpdate(req);
+    if (!resp.success()) {
+      throw new Exception(String.format("错误码：%s，错误描述：%s", resp.getCode(), resp.getMsg()));
+    }
+
+    return Arrays.asList(resp.getData().getRecords());
+  }
+
+  /**
+   * 批量更新多维表格的记录。
+   * 
+   * @param appToken  多维表格的唯一标识。
+   * @param tableId   数据表的唯一标识。
+   * @param recordIds 记录的唯一标识列表。
+   * @param records   记录列表。
+   * @return 更新的记录列表。
+   * @throws Exception
+   */
+  public List<AppTableRecord> batchUpdateRecords(String appToken, String tableId, List<String> recordIds,
+      List<Map<String, Object>> records)
+      throws Exception {
+    int batchSize = 1000;
+    int total = records.size();
+
+    List<AppTableRecord> updatedRecords = new ArrayList<>();
+
+    for (int from = 0; from < total; from += batchSize) {
+      int to = Math.min(from + batchSize, total);
+
+      List<String> batchRecordIds = recordIds.subList(from, to);
+      List<Map<String, Object>> batchRecords = records.subList(from, to);
+
+      List<AppTableRecord> updatedBatch = this.internalBatchUpdateRecords(appToken, tableId, batchRecordIds,
+          batchRecords);
+      updatedRecords.addAll(updatedBatch);
+    }
+
+    return updatedRecords;
+  }
+
+  /**
+   * 更新多维表格的记录。
+   * 
+   * @param appToken 多维表格的唯一标识。
+   * @param tableId  数据表的唯一标识。
+   * @param recordId 记录的唯一标识。
+   * @param fields   记录的字段。
+   * @return 更新的记录。
+   * @throws Exception
+   */
+  public AppTableRecord updateRecord(String appToken, String tableId, String recordId, Map<String, Object> fields)
+      throws Exception {
+    List<AppTableRecord> updatedRecords = this.batchUpdateRecords(appToken, tableId,
+        Collections.singletonList(recordId), Collections.singletonList(fields));
+
+    return updatedRecords.get(0);
   }
 }

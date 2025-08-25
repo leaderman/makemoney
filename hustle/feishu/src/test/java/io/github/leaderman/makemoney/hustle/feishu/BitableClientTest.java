@@ -91,4 +91,15 @@ public class BitableClientTest {
   public void testTruncateTable() throws Exception {
     bitableClient.truncateTable("XGG1blHrkangStsSV82cvhi1n9d", "tblNB7kgiANos6TZ");
   }
+
+  @Test
+  public void testBatchUpdateRecords() throws Exception {
+    List<String> recordIds = List.of("recuRcReU9oM1V", "recuUQQq8FmbaA");
+    List<Map<String, Object>> records = List
+        .of(Map.of("值", String.valueOf(System.currentTimeMillis())),
+            Map.of("值", String.valueOf(System.currentTimeMillis())));
+
+    bitableClient.batchUpdateRecords("XGG1blHrkangStsSV82cvhi1n9d",
+        "tblNB7kgiANos6TZ", recordIds, records);
+  }
 }
