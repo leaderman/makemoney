@@ -1,10 +1,10 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.domain.model;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import io.github.leaderman.makemoney.hustle.domain.model.BaseModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncPositionRequest;
@@ -39,8 +39,10 @@ public class PositionModel extends BaseModel {
     model.setDailyProfitLoss(NumberUtil.toBigDecimal(request.getDailyProfitLoss(), BigDecimal.ZERO));
     model.setFrozenFunds(NumberUtil.toBigDecimal(request.getFrozenFunds(), BigDecimal.ZERO));
 
-    if (CollectionUtils.isNotEmpty(request.getSecurities())) {
+    if (Objects.nonNull(request.getSecurities())) {
       model.setSecurities(request.getSecurities().stream().map(SecurityModel::from).collect(Collectors.toList()));
+    } else {
+      model.setSecurities(Collections.emptyList());
     }
 
     return model;
