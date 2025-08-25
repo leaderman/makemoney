@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,14 +18,9 @@ public class RequestIdInterceptor implements HandlerInterceptor {
     String requestId = UUID.randomUUID().toString();
     MDC.put(X_REQUEST_ID, requestId);
 
-    return true;
-  }
-
-  @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-      ModelAndView modelAndView) throws Exception {
-    String requestId = MDC.get(X_REQUEST_ID);
     response.setHeader(X_REQUEST_ID, requestId);
+
+    return true;
   }
 
   @Override
