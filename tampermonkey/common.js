@@ -196,6 +196,15 @@ window.mm.post = function (url, data, headers = {}) {
 };
 
 /**
+ * 查询元素。
+ * @param {string} selector 选择器。
+ * @returns {Node} 元素。
+ */
+window.mm.query = function (selector) {
+  return document.querySelector(selector);
+};
+
+/**
  * 判断元素是否存在。
  * @param {string} selector 选择器。
  * @returns {boolean} 是否存在。

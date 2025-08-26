@@ -7,6 +7,11 @@
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
 // ==/UserScript==
 
+const NAV =
+  "#main > div > div.mt20 > div.v_nav > ul > li.top_item.open > ul > li.sub_item.current > a";
+const NEXT = '#divContents > div > div.confooter > div > a[data-page="next"]';
+const PAGE = "#nowPage";
+
 (function () {
   "use strict";
 
@@ -73,38 +78,7 @@ function getOrders() {
   return orders;
 }
 
-/**
- * 等待数据。
- */
-async function waitForData() {
-  while (true) {
-    const trs = window.mm.all(document, "#tabBody > tr");
-    if (trs.length !== 1) {
-      return;
-    }
-
-    const tds = window.mm.all(trs[0], "td");
-    if (tds.length !== 1) {
-      return;
-    }
-
-    const text = window.mm.textOf(tds[0]);
-    if (text !== "加载中...") {
-      return;
-    }
-
-    await window.mm.sleep(100);
-  }
-}
-
-async function main() {
-  // 等待数据。
-  console.log("等待当日委托数据...");
-  await waitForData();
-  console.log("当日委托数据已就绪");
-
-  // 获取委托列表。
-  const orders = getOrders();
+function printOrders(orders) {
   console.log("委托列表：", orders.length);
 
   for (const order of orders) {
@@ -135,10 +109,80 @@ async function main() {
       order.currency
     );
   }
+}
+
+/**
+ * 等待数据。
+ */
+async function waitForData() {
+  while (true) {
+    const trs = window.mm.all(document, "#tabBody > tr");
+    if (trs.length !== 1) {
+      return;
+    }
+
+    const tds = window.mm.all(trs[0], "td");
+    if (tds.length !== 1) {
+      return;
+    }
+
+    const text = window.mm.textOf(tds[0]);
+    if (text !== "加载中...") {
+      return;
+    }
+
+    await window.mm.sleep(100);
+  }
+}
+
+function hasNext() {
+  return window.mm.exists(NEXT);
+}
+
+function next() {
+  window.mm.click(NEXT);
+}
+
+function nav() {
+  window.mm.click(NAV);
+}
+
+async function main() {
+  // 等待数据。
+  console.log("等待当日委托数据...");
+  await waitForData();
+  console.log("当日委托数据已就绪");
+
+  // 获取委托列表。
+  const orders = getOrders();
+  // 打印委托列表。
+  printOrders(orders);
 
   console.log("当日委托数据解析完成");
 
-  window.mm.click(
-    "#main > div > div.mt20 > div.v_nav > ul > li.top_item.open > ul > li.sub_item.current > a"
-  );
+  window.mm.sleep(3000);
+
+  if (!hasNext()) {
+    console.log("没有下一页，点击当日委托");
+    nav();
+  }
+
+  const table = window.mm.query("#tabBody");
+
+  const observer = new MutationObserver(() => {
+    console.log(window.mm.text(PAGE));
+
+    // 获取委托列表。
+    const orders = getOrders();
+    // 打印委托列表。
+    printOrders(orders);
+
+    if (hasNext()) {
+      console.log("点击下一页");
+      next();
+    } else {
+    }
+  });
+
+  observer.observe(table, { childList: true, subtree: true });
 }
