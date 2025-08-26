@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.github.leaderman.makemoney.hustle.domain.response.Response;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.OrderModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncOrdersRequest;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.OrderService;
@@ -24,16 +25,19 @@ public class OrderController {
   private final OrderService orderService;
 
   @PostMapping("/sync")
-  public void sync(@RequestBody SyncOrdersRequest request) {
+  public Response<Void> sync(@RequestBody SyncOrdersRequest request) {
     try {
       List<SyncOrdersRequest.Order> orders = request.getOrders();
       if (CollectionUtils.isEmpty(orders)) {
-        return;
+        return Response.ok();
       }
 
       orderService.sync(orders.stream().map(OrderModel::from).collect(Collectors.toList()));
+
+      return Response.ok();
     } catch (Exception e) {
       log.error("同步今日委托错误：{}", ExceptionUtils.getStackTrace(e));
+      return Response.internalServerError();
     }
   }
 }
