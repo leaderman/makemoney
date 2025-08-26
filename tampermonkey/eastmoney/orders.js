@@ -189,7 +189,7 @@ async function main() {
     const orders = getOrders();
     // 打印委托列表。
     printOrders(orders);
-    console.log("当日委托数据解析完成（page）");
+    console.log(`当日委托数据解析完成（${page}）`);
 
     await window.mm.post(
       URL,
@@ -200,7 +200,7 @@ async function main() {
         Authorization: "Bearer " + TOKEN,
       }
     );
-    console.log("当日委托数据同步完成（page）");
+    console.log(`当日委托数据同步完成（${page}）`);
 
     if (hasNext()) {
       console.log("点击下一页");

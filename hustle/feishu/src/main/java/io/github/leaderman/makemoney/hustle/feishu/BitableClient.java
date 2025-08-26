@@ -70,7 +70,7 @@ public class BitableClient {
           .pageToken(pageToken)
           .build();
 
-      this.limiterClient.acquire("feishu.bitable.listTables", 20, 60);
+      this.limiterClient.acquire("feishu.bitable.listTables", 20, 1);
 
       ListAppTableResp resp = this.feishuClient.getClient().bitable().v1().appTable().list(req);
       if (!resp.success()) {
@@ -108,7 +108,7 @@ public class BitableClient {
           .pageToken(pageToken)
           .build();
 
-      this.limiterClient.acquire("feishu.bitable.listViews", 20, 60);
+      this.limiterClient.acquire("feishu.bitable.listViews", 20, 1);
 
       ListAppTableViewResp resp = this.feishuClient.getClient().bitable().v1().appTableView().list(req);
       if (!resp.success()) {
@@ -146,7 +146,7 @@ public class BitableClient {
           .pageToken(pageToken)
           .build();
 
-      this.limiterClient.acquire("feishu.bitable.listRecords", 20, 60);
+      this.limiterClient.acquire("feishu.bitable.listRecords", 20, 1);
 
       ListAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().list(req);
       if (!resp.success()) {
@@ -290,7 +290,7 @@ public class BitableClient {
             .build())
         .build();
 
-    this.limiterClient.acquire("feishu.bitable.getRecord", 20, 60);
+    this.limiterClient.acquire("feishu.bitable.getRecord", 20, 1);
 
     BatchGetAppTableRecordResp resp = this.feishuClient.getClient().bitable().v1().appTableRecord().batchGet(req);
     if (!resp.success()) {
