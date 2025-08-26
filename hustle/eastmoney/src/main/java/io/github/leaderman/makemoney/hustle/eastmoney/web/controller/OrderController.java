@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/eastmoney/position")
 @Slf4j
 public class OrderController {
   private final OrderService orderService;

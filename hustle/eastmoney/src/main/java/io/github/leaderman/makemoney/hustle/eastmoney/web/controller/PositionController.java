@@ -15,12 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/eastmoney")
+@RequestMapping("/eastmoney/position")
 @Slf4j
 public class PositionController {
   private final PositionService positionService;
 
-  @PostMapping("/position/sync")
+  @PostMapping("/sync")
   public Response<Void> syncPosition(@RequestBody SyncPositionRequest request) {
     try {
       PositionModel model = PositionModel.from(request);
