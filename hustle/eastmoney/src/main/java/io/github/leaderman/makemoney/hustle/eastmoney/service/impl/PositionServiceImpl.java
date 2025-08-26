@@ -1,10 +1,12 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -105,9 +107,11 @@ public class PositionServiceImpl implements PositionService {
     Map<String, SecurityModel> leftRecords = securities.stream()
         .filter(security -> security.getHoldingQuantity() > 0)
         .collect(Collectors.toMap(SecurityModel::getSecurityCode, Function.identity()));
-    Map<String, AppTableRecord> rightRecords = this.bitableClient.listTableRecords(this.bitable, this.securitiesTable)
-        .stream()
-        .collect(Collectors.toMap(record -> (String) record.getFields().get("证券代码"), Function.identity()));
+    Map<String, AppTableRecord> rightRecords = Optional
+        .ofNullable(this.bitableClient.listTableRecords(this.bitable, this.securitiesTable))
+        .map(records -> records.stream()
+            .collect(Collectors.toMap(record -> (String) record.getFields().get("证券代码"), Function.identity())))
+        .orElse(Collections.emptyMap());
 
     for (Entry<String, SecurityModel> entry : leftRecords.entrySet()) {
       String securityCode = entry.getKey();
