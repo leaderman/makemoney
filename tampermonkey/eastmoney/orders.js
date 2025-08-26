@@ -37,7 +37,7 @@ function getOrders() {
     // 委托时间。
     const orderTime = window.mm.textOf(tds[0]);
     // 证券代码。
-    const orderType = window.mm.textOf(window.mm.one(tds[1], "a"));
+    const securityCode = window.mm.textOf(window.mm.one(tds[1], "a"));
     // 证券名称。
     const securityName = window.mm.textOf(window.mm.one(tds[2], "a"));
     // 委托方向。
@@ -61,7 +61,7 @@ function getOrders() {
 
     orders.push({
       orderTime,
-      orderType,
+      securityCode,
       securityName,
       orderSide,
       orderQuantity,
@@ -86,7 +86,7 @@ function printOrders(orders) {
       "委托时间：",
       order.orderTime,
       "，证券代码：",
-      order.orderType,
+      order.securityCode,
       "，证券名称：",
       order.securityName,
       "，委托方向：",
@@ -160,7 +160,7 @@ async function main() {
 
   console.log("当日委托数据解析完成");
 
-  window.mm.sleep(3000);
+  await window.mm.sleep(3000);
 
   if (!hasNext()) {
     console.log("没有下一页，点击当日委托");
@@ -169,7 +169,7 @@ async function main() {
 
   const table = window.mm.query("#tabBody");
 
-  const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(async () => {
     console.log(window.mm.text(PAGE));
 
     // 获取委托列表。
@@ -177,12 +177,19 @@ async function main() {
     // 打印委托列表。
     printOrders(orders);
 
+    await window.mm.sleep(3000);
+
     if (hasNext()) {
       console.log("点击下一页");
       next();
     } else {
+      console.log("没有下一页，点击当日委托");
+      nav();
     }
   });
 
   observer.observe(table, { childList: true, subtree: true });
+
+  console.log("监听器已就绪，点击下一页");
+  next();
 }
