@@ -194,3 +194,23 @@ window.mm.post = function (url, data, headers = {}) {
     });
   });
 };
+
+/**
+ * 判断元素是否存在。
+ * @param {string} selector 选择器。
+ * @returns {boolean} 是否存在。
+ */
+window.mm.exists = function (selector) {
+  return document.querySelector(selector) !== null;
+};
+
+/**
+ * 点击元素。
+ * @param {string} selector 选择器。
+ */
+window.mm.click = function (selector) {
+  const el = document.querySelector(selector);
+  if (el) {
+    el.click();
+  }
+};

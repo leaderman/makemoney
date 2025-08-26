@@ -138,8 +138,7 @@ async function main() {
 
   console.log("当日委托数据解析完成");
 
-  // 等待页面重新加载
-  console.log("等待页面重新加载...");
-  await window.mm.sleep(3000);
-  // window.mm.reload();
+  window.mm.click(
+    "#main > div > div.mt20 > div.v_nav > ul > li.top_item.open > ul > li.sub_item.current > a"
+  );
 }

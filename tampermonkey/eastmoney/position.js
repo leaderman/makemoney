@@ -267,8 +267,9 @@ async function main() {
     }
   );
 
+  console.log("资金持仓数据同步完成");
+
   // 等待页面重新加载
-  console.log("等待页面重新加载...");
-  await window.mm.sleep(3000);
-  // window.mm.reload();
+  console.log("页面重新加载...");
+  window.mm.reload();
 }
