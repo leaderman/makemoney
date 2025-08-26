@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.OrderModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncOrdersRequest;
@@ -16,7 +16,7 @@ import io.github.leaderman.makemoney.hustle.eastmoney.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/order")
 @Slf4j

@@ -5,7 +5,12 @@
 // @description  东方财富当日委托
 // @match        https://jywg.18.cn/Search/Orders
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
+// @connect      *
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
+
+const URL = "xxx";
+const TOKEN = "xxx";
 
 const NAV =
   "#main > div > div.mt20 > div.v_nav > ul > li.top_item.open > ul > li.sub_item.current > a";
@@ -157,10 +162,18 @@ async function main() {
   const orders = getOrders();
   // 打印委托列表。
   printOrders(orders);
-
   console.log("当日委托数据解析完成");
 
-  await window.mm.sleep(3000);
+  await window.mm.post(
+    URL,
+    {
+      orders,
+    },
+    {
+      Authorization: "Bearer " + TOKEN,
+    }
+  );
+  console.log("当日委托数据同步完成");
 
   if (!hasNext()) {
     console.log("没有下一页，点击当日委托");
@@ -170,14 +183,24 @@ async function main() {
   const table = window.mm.query("#tabBody");
 
   const observer = new MutationObserver(async () => {
-    console.log(window.mm.text(PAGE));
+    const page = window.mm.text(PAGE);
 
     // 获取委托列表。
     const orders = getOrders();
     // 打印委托列表。
     printOrders(orders);
+    console.log("当日委托数据解析完成（page）");
 
-    await window.mm.sleep(3000);
+    await window.mm.post(
+      URL,
+      {
+        orders,
+      },
+      {
+        Authorization: "Bearer " + TOKEN,
+      }
+    );
+    console.log("当日委托数据同步完成（page）");
 
     if (hasNext()) {
       console.log("点击下一页");
