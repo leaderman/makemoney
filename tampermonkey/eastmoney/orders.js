@@ -17,11 +17,29 @@ const NAV =
 const NEXT = '#divContents > div > div.confooter > div > a[data-page="next"]';
 const PAGE = "#nowPage";
 
-(function () {
-  "use strict";
+/**
+ * 等待数据。
+ */
+async function waitForData() {
+  while (true) {
+    const trs = window.mm.all(document, "#tabBody > tr");
+    if (trs.length !== 1) {
+      return;
+    }
 
-  main();
-})();
+    const tds = window.mm.all(trs[0], "td");
+    if (tds.length !== 1) {
+      return;
+    }
+
+    const text = window.mm.textOf(tds[0]);
+    if (text !== "加载中...") {
+      return;
+    }
+
+    await window.mm.sleep(100);
+  }
+}
 
 /**
  * 获取委托列表。
@@ -117,102 +135,99 @@ function printOrders(orders) {
 }
 
 /**
- * 等待数据。
+ * 同步当日委托数据。
+ * @param {Array<Object>} orders 当日委托数据。
  */
-async function waitForData() {
-  while (true) {
-    const trs = window.mm.all(document, "#tabBody > tr");
-    if (trs.length !== 1) {
-      return;
-    }
+async function syncOrders(orders) {
+  try {
+    await window.mm.post(URL, { orders }, { Authorization: "Bearer " + TOKEN });
+  } catch (error) {
+    console.error("同步当日委托数据失败:", error.message);
 
-    const tds = window.mm.all(trs[0], "td");
-    if (tds.length !== 1) {
-      return;
-    }
-
-    const text = window.mm.textOf(tds[0]);
-    if (text !== "加载中...") {
-      return;
-    }
-
-    await window.mm.sleep(100);
+    await window.mm.sleep(30000);
   }
 }
 
+/**
+ * 判断是否有下一页。
+ * @returns {boolean} 是否有下一页。
+ */
 function hasNext() {
   return window.mm.exists(NEXT);
 }
 
+/**
+ * 点击下一页。
+ */
 function next() {
   window.mm.click(NEXT);
 }
 
-function nav() {
-  window.mm.click(NAV);
+/**
+ * 获取当前页码。
+ * @returns {number} 当前页码。
+ */
+function getPage() {
+  return parseInt(window.mm.text(PAGE).replace(/\D/g, ""));
 }
 
+/**
+ * 等待指定页码。
+ * @param {number} page 指定页码。
+ */
+async function waitForPage(page) {
+  while (getPage() !== page) {
+    await window.mm.sleep(100);
+  }
+}
+
+/**
+ * 主函数。
+ */
 async function main() {
   // 等待数据。
   console.log("等待当日委托数据...");
   await waitForData();
   console.log("当日委托数据已就绪");
 
-  // 获取委托列表。
+  // 获取首页委托列表。
   const orders = getOrders();
-  // 打印委托列表。
-  printOrders(orders);
-  console.log("当日委托数据解析完成");
+  console.log("首页委托数据解析完成");
 
-  await window.mm.post(
-    URL,
-    {
-      orders,
-    },
-    {
-      Authorization: "Bearer " + TOKEN,
+  if (hasNext()) {
+    // 当前页码。
+    let page = 1;
+
+    while (hasNext()) {
+      // 点击下一页。
+      next();
+
+      // 等待下一页数据。
+      await waitForPage(++page);
+
+      // 获取委托列表。
+      const pageOrders = getOrders();
+      console.log(`第 ${page} 页委托数据解析完成`);
+
+      // 合并委托列表。
+      orders.push(...pageOrders);
     }
-  );
-  console.log("当日委托数据同步完成");
-
-  if (!hasNext()) {
-    console.log("没有下一页，点击当日委托");
-    nav();
   }
 
-  const table = window.mm.query("#tabBody");
+  // 打印委托列表。
+  printOrders(orders);
 
-  const observer = new MutationObserver(async () => {
-    const page = window.mm.text(PAGE);
+  // 同步委托数据。
+  await syncOrders(orders);
+  console.log("委托数据同步完成");
 
-    // 获取委托列表。
-    const orders = getOrders();
-    // 打印委托列表。
-    printOrders(orders);
-    console.log(`当日委托数据解析完成（${page}）`);
-
-    await window.mm.post(
-      URL,
-      {
-        orders,
-      },
-      {
-        Authorization: "Bearer " + TOKEN,
-      }
-    );
-    console.log(`当日委托数据同步完成（${page}）`);
-
-    if (hasNext()) {
-      console.log("点击下一页");
-      next();
-    } else {
-      console.log("没有下一页，点击当日委托");
-      nav();
-    }
-  });
-
-  observer.observe(table, { childList: true, subtree: true });
-
-  console.log("监听器已就绪，点击下一页");
-  next();
+  // 重新加载页面。
+  console.log("重新加载页面...");
+  window.mm.reload();
 }
+
+(function () {
+  "use strict";
+
+  main();
+})();

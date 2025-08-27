@@ -55,6 +55,10 @@ public class OrderServiceImpl implements OrderService {
     return record;
   }
 
+  private boolean shouldUpdateRecord(AppTableRecord record) {
+    return record.getFields().get("委托状态").equals("已报");
+  }
+
   @Override
   public void sync(List<OrderModel> orders) {
     try {
@@ -81,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
         if (!rightRecords.containsKey(orderId)) {
           // 创建记录。
           createRecords.add(toRecord(order));
-        } else {
+        } else if (shouldUpdateRecord(rightRecords.get(orderId))) {
           // 更新记录。
           updateRecordIds.add(rightRecords.get(orderId).getRecordId());
           updateRecords.add(toRecord(order));
