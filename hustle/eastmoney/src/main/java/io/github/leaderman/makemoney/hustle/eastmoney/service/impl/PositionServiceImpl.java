@@ -22,9 +22,11 @@ import io.github.leaderman.makemoney.hustle.eastmoney.service.PositionService;
 import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PositionServiceImpl implements PositionService {
   private final ConfigClient configClient;
   private final BitableClient bitableClient;
@@ -137,16 +139,19 @@ public class PositionServiceImpl implements PositionService {
 
     if (CollectionUtils.isNotEmpty(createRecords)) {
       // 创建。
+      log.info("创建 {} 条记录", createRecords.size());
       this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, createRecords);
     }
 
     if (CollectionUtils.isNotEmpty(updateRecords)) {
       // 更新。
+      log.info("更新 {} 条记录", updateRecords.size());
       this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, updateRecordIds, updateRecords);
     }
 
     if (CollectionUtils.isNotEmpty(deleteRecordIds)) {
       // 删除。
+      log.info("删除 {} 条记录", deleteRecordIds.size());
       this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, deleteRecordIds);
     }
   }

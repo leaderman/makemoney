@@ -20,9 +20,11 @@ import io.github.leaderman.makemoney.hustle.eastmoney.service.OrderService;
 import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
   private final ConfigClient configClient;
   private final BitableClient bitableClient;
@@ -94,11 +96,13 @@ public class OrderServiceImpl implements OrderService {
 
       if (!createRecords.isEmpty()) {
         // 批量创建记录。
+        log.info("创建 {} 条记录", createRecords.size());
         this.bitableClient.batchCreateRecords(this.bitable, this.ordersTable, createRecords);
       }
 
       if (!updateRecordIds.isEmpty()) {
         // 批量更新记录。
+        log.info("更新 {} 条记录", updateRecordIds.size());
         this.bitableClient.batchUpdateRecords(this.bitable, this.ordersTable, updateRecordIds, updateRecords);
       }
     } catch (Exception e) {
