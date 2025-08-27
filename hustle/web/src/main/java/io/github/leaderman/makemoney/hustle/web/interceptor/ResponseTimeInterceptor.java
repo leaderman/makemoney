@@ -23,9 +23,12 @@ public class ResponseTimeInterceptor implements HandlerInterceptor {
   @Override
   public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
       throws Exception {
+    String uri = request.getRequestURI();
+
     Long startTime = Long.parseLong(MDC.get(X_RESPONSE_TIME));
     Long responseTime = System.currentTimeMillis() - startTime;
-    log.info("{} ms", responseTime);
+
+    log.info("{} {} ms", uri, responseTime);
 
     MDC.remove(X_RESPONSE_TIME);
   }
