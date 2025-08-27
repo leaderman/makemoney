@@ -12,12 +12,6 @@
 const URL = "xxx";
 const TOKEN = "xxx";
 
-(function () {
-  "use strict";
-
-  main();
-})();
-
 /**
  * 获取总资产。
  * @returns {string} 总资产。
@@ -178,49 +172,49 @@ async function waitForData() {
   } while (totalAssets === "-");
 }
 
-async function main() {
-  // 等待数据。
-  console.log("等待资金持仓数据...");
-  await waitForData();
-  console.log("资金持仓数据已就绪");
+/**
+ * 获取资金持仓。
+ * @returns {Object} 资金持仓。
+ */
+function getPosition() {
+  return {
+    // 总资产。
+    totalAssets: getTotalAssets(),
+    // 证券市值。
+    securitiesMarketValue: getSecuritiesMarketValue(),
+    // 可用资金。
+    availableFunds: getAvailableFunds(),
+    // 持仓盈亏。
+    positionProfitLoss: getPositionProfitLoss(),
+    // 资金余额。
+    cashBalance: getCashBalance(),
+    // 可取资金。
+    withdrawableFunds: getWithdrawableFunds(),
+    // 当日盈亏。
+    dailyProfitLoss: getDailyProfitLoss(),
+    // 冻结资金。
+    frozenFunds: getFrozenFunds(),
+    // 证券列表。
+    securities: getSecurities(),
+  };
+}
 
-  // 获取总资产。
-  const totalAssets = getTotalAssets();
-  console.log("总资产：", totalAssets);
+/**
+ * 打印资金持仓。
+ * @param {Object} position 资金持仓。
+ */
+function printPosition(position) {
+  console.log("总资产：", position.totalAssets);
+  console.log("证券市值：", position.securitiesMarketValue);
+  console.log("可用资金：", position.availableFunds);
+  console.log("持仓盈亏：", position.positionProfitLoss);
+  console.log("资金余额：", position.cashBalance);
+  console.log("可取资金：", position.withdrawableFunds);
+  console.log("当日盈亏：", position.dailyProfitLoss);
+  console.log("冻结资金：", position.frozenFunds);
 
-  // 获取证券市值。
-  const securitiesMarketValue = getSecuritiesMarketValue();
-  console.log("证券市值：", securitiesMarketValue);
-
-  // 获取可用资金。
-  const availableFunds = getAvailableFunds();
-  console.log("可用资金：", availableFunds);
-
-  // 获取持仓盈亏。
-  const positionProfitLoss = getPositionProfitLoss();
-  console.log("持仓盈亏：", positionProfitLoss);
-
-  // 获取资金余额。
-  const cashBalance = getCashBalance();
-  console.log("资金余额：", cashBalance);
-
-  // 获取可取资金。
-  const withdrawableFunds = getWithdrawableFunds();
-  console.log("可取资金：", withdrawableFunds);
-
-  // 获取当日盈亏。
-  const dailyProfitLoss = getDailyProfitLoss();
-  console.log("当日盈亏：", dailyProfitLoss);
-
-  // 获取冻结资金。
-  const frozenFunds = getFrozenFunds();
-  console.log("冻结资金：", frozenFunds);
-
-  // 获取证券列表。
-  const securities = getSecurities();
-  console.log("证券列表：", securities.length);
-
-  for (const security of securities) {
+  console.log("证券列表：", position.securities.length);
+  for (const security of position.securities) {
     console.log(
       "证券代码：",
       security.securityCode,
@@ -246,30 +240,50 @@ async function main() {
       security.dailyProfitLossRatio
     );
   }
+}
 
-  console.log("资金持仓数据解析完成");
-
-  await window.mm.post(
-    URL,
-    {
-      totalAssets,
-      securitiesMarketValue,
-      availableFunds,
-      positionProfitLoss,
-      cashBalance,
-      withdrawableFunds,
-      dailyProfitLoss,
-      frozenFunds,
-      securities,
-    },
-    {
+/**
+ * 同步资金持仓。
+ * @param {Object} position 资金持仓。
+ */
+async function syncPosition(position) {
+  try {
+    await window.mm.post(URL, position, {
       Authorization: "Bearer " + TOKEN,
-    }
-  );
+    });
+  } catch (error) {
+    console.error("同步资金持仓数据失败:", error.message);
 
+    await window.mm.sleep(30000);
+  }
+}
+
+/**
+ * 主函数。
+ */
+async function main() {
+  // 等待数据。
+  console.log("等待资金持仓数据...");
+  await waitForData();
+  console.log("资金持仓数据已就绪");
+
+  // 获取资金持仓。
+  const position = getPosition();
+  console.log("资金持仓数据获取完成");
+
+  // 打印资金持仓。
+  printPosition(position);
+
+  await syncPosition(position);
   console.log("资金持仓数据同步完成");
 
-  // 等待页面重新加载
-  console.log("页面重新加载...");
+  // 重新加载页面。
+  console.log("重新加载页面...");
   window.mm.reload();
 }
+
+(function () {
+  "use strict";
+
+  main();
+})();
