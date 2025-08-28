@@ -9,8 +9,8 @@
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
-const URL = "https://makemoney.miaoyurun.com/api/eastmoney/fund/sync";
-const TOKEN = "jzJZK7jqOTPM8iGBOrLKdfOpEQyGGCX2";
+const URL = "xxx";
+const TOKEN = "xxx";
 
 /**
  * 等待表格。
@@ -42,7 +42,7 @@ function getFunds() {
     // 代码。
     const code = window.mm.textOf(window.mm.one(tds[1], "a"));
     // 名称。
-    const name = window.mm.a();
+    const name = window.mm.attributeOf(window.mm.one(tds[2], "a"), "title");
     // 开盘价。
     const openPrice = window.mm.textOf(window.mm.one(tds[4], "span"));
     // 最新价。
