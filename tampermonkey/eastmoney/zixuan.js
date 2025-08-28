@@ -9,6 +9,9 @@
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
+const URL = "https://makemoney.miaoyurun.com/api/eastmoney/fund/sync";
+const TOKEN = "jzJZK7jqOTPM8iGBOrLKdfOpEQyGGCX2";
+
 /**
  * 等待表格。
  */
@@ -39,7 +42,7 @@ function getFunds() {
     // 代码。
     const code = window.mm.textOf(window.mm.one(tds[1], "a"));
     // 名称。
-    const name = window.mm.textOf(window.mm.one(tds[2], "a"));
+    const name = window.mm.a();
     // 开盘价。
     const openPrice = window.mm.textOf(window.mm.one(tds[4], "span"));
     // 最新价。
@@ -74,6 +77,54 @@ function getFunds() {
 }
 
 /**
+ * 打印基金列表。
+ * @param {Array<Object>} funds 基金列表。
+ */
+function printFunds(funds) {
+  for (const fund of funds) {
+    console.log(
+      "代码：",
+      fund.code,
+      "，名称：",
+      fund.name,
+      "， 开盘价：",
+      fund.openPrice,
+      "， 最新价：",
+      fund.latestPrice,
+      "， 最高价：",
+      fund.highPrice,
+      "， 最低价：",
+      fund.lowPrice,
+      "， 涨跌幅：",
+      fund.changePercent,
+      "， 涨跌额：",
+      fund.changeAmount,
+      "， 昨收：",
+      fund.prevClose
+    );
+  }
+}
+
+/**
+ * 同步基金列表。
+ * @param {Array<Object>} funds 基金列表。
+ */
+async function syncFunds(funds) {
+  try {
+    await window.mm.post(
+      URL,
+      { funds },
+      {
+        Authorization: "Bearer " + TOKEN,
+      }
+    );
+  } catch (error) {
+    console.error("同步基金列表失败:", error.message);
+    await window.mm.sleep(30000);
+  }
+}
+
+/**
  * 主函数。
  */
 async function main() {
@@ -83,9 +134,18 @@ async function main() {
 
   while (true) {
     const funds = getFunds();
-    console.log(funds.length);
+    console.log("基金列表获取完成");
 
-    await window.mm.sleep(1000);
+    if (funds.length === 0) {
+      console.log("基金列表为空，等待下一轮...");
+      await window.mm.sleep(1000);
+      continue;
+    }
+
+    printFunds(funds);
+
+    await syncFunds(funds);
+    console.log("基金列表同步完成");
   }
 }
 

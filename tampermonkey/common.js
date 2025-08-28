@@ -223,3 +223,23 @@ window.mm.click = function (selector) {
     el.click();
   }
 };
+
+/**
+ * 获取元素的属性值。
+ * @param {string} selector 选择器。
+ * @param {string} name 属性名称。
+ * @returns {string} 属性值。
+ */
+window.mm.attribute = function (selector, name) {
+  return document.querySelector(selector)?.getAttribute(name) || "";
+};
+
+/**
+ * 获取元素的属性值。
+ * @param {Node} el 元素。
+ * @param {string} name 属性名称。
+ * @returns {string} 属性值。
+ */
+window.mm.attributeOf = function (el, name) {
+  return el?.getAttribute(name) || "";
+};
