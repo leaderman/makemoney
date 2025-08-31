@@ -54,4 +54,59 @@ public class NumberUtil {
       return defaultValue;
     }
   }
+
+  /**
+   * 判断两个数是否相等。
+   * 
+   * @param left  左边的数。
+   * @param right 右边的数。
+   * @return 如果两个高精度浮点数相等，则返回 true，否则返回 false。
+   */
+  public static boolean equals(BigDecimal left, BigDecimal right) {
+    return left.compareTo(right) == 0;
+  }
+
+  /**
+   * 判断左边数是否大于右边数。
+   * 
+   * @param left  左边的数。
+   * @param right 右边的数。
+   * @return 如果左边数大于右边数，则返回 true，否则返回 false。
+   */
+  public static boolean greaterThan(BigDecimal left, BigDecimal right) {
+    return left.compareTo(right) > 0;
+  }
+
+  /**
+   * 判断左边数是否小于右边数。
+   * 
+   * @param left  左边的数。
+   * @param right 右边的数。
+   * @return 如果左边数小于右边数，则返回 true，否则返回 false。
+   */
+  public static boolean lessThan(BigDecimal left, BigDecimal right) {
+    return left.compareTo(right) < 0;
+  }
+
+  /**
+   * 判断左边数是否大于等于右边数。
+   * 
+   * @param left  左边的数。
+   * @param right 右边的数。
+   * @return 如果左边数大于等于右边数，则返回 true，否则返回 false。
+   */
+  public static boolean greaterThanOrEqualTo(BigDecimal left, BigDecimal right) {
+    return left.compareTo(right) >= 0;
+  }
+
+  /**
+   * 判断左边数是否小于等于右边数。
+   * 
+   * @param left  左边的数。
+   * @param right 右边的数。
+   * @return 如果左边数小于等于右边数，则返回 true，否则返回 false。
+   */
+  public static boolean lessThanOrEqualTo(BigDecimal left, BigDecimal right) {
+    return left.compareTo(right) <= 0;
+  }
 }
