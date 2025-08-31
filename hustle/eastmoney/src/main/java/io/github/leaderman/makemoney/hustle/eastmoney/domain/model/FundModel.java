@@ -3,6 +3,7 @@ package io.github.leaderman.makemoney.hustle.eastmoney.domain.model;
 import java.math.BigDecimal;
 
 import io.github.leaderman.makemoney.hustle.domain.model.BaseModel;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncFundRequest;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
@@ -43,5 +44,21 @@ public class FundModel extends BaseModel {
     model.setPrevClose(NumberUtil.toBigDecimal(fund.getPrevClose(), BigDecimal.ZERO));
 
     return model;
+  }
+
+  public static FundEntity to(FundModel model) {
+    FundEntity entity = new FundEntity();
+
+    entity.setCode(model.getCode());
+    entity.setName(model.getName());
+    entity.setOpenPrice(model.getOpenPrice());
+    entity.setLatestPrice(model.getLatestPrice());
+    entity.setHighPrice(model.getHighPrice());
+    entity.setLowPrice(model.getLowPrice());
+    entity.setChangePercent(model.getChangePercent());
+    entity.setChangeAmount(model.getChangeAmount());
+    entity.setPrevClose(model.getPrevClose());
+
+    return entity;
   }
 }

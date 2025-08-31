@@ -8,7 +8,7 @@ public interface FundService {
   /**
    * 同步基金。
    * 
-   * @param funds 基金列表。
+   * @param models 基金列表。
    */
-  void sync(List<FundModel> funds);
+  void sync(List<FundModel> models);
 }
