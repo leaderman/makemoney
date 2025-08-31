@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -16,6 +17,7 @@ import io.github.leaderman.makemoney.hustle.eastmoney.service.FundService;
 @Service
 public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> implements FundService {
   @Override
+  @Transactional
   public void sync(List<FundModel> models) {
     // 获取代码列表。
     List<String> codes = models.stream().map(FundModel::getCode).collect(Collectors.toList());
