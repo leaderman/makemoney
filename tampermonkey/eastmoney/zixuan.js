@@ -29,51 +29,56 @@ async function waitForTable() {
 
 /**
  * 获取基金列表。
- * @returns {Array<Object>} 基金列表。
+ * @returns {Promise<Array<Object>>} 基金列表。
  */
-function getFunds() {
+async function getFunds() {
   const funds = [];
 
-  const trs = window.mm.all(document, "#table_m > table > tbody > tr");
+  try {
+    const trs = window.mm.all(document, "#table_m > table > tbody > tr");
 
-  for (const tr of trs) {
-    const tds = window.mm.all(tr, "td");
+    for (const tr of trs) {
+      const tds = window.mm.all(tr, "td");
 
-    // 代码。
-    const code = window.mm.textOf(window.mm.one(tds[1], "a"));
-    // 名称。
-    const name = window.mm.attributeOf(window.mm.one(tds[2], "a"), "title");
-    // 开盘价。
-    const openPrice = window.mm.textOf(window.mm.one(tds[4], "span"));
-    // 最新价。
-    const latestPrice = window.mm.textOf(window.mm.one(tds[5], "span"));
-    // 最高价。
-    const highPrice = window.mm.textOf(window.mm.one(tds[6], "span"));
-    // 最低价。
-    const lowPrice = window.mm.textOf(window.mm.one(tds[7], "span"));
-    // 涨跌幅。
-    const changePercent = window.mm.textOf(window.mm.one(tds[8], "span"));
-    // 涨跌额。
-    const changeAmount = window.mm.textOf(window.mm.one(tds[9], "span"));
-    // 昨收。
-    const prevClose = window.mm.textOf(window.mm.one(tds[10], "span"));
+      // 代码。
+      const code = window.mm.textOf(window.mm.one(tds[1], "a"));
+      // 名称。
+      const name = window.mm.attributeOf(window.mm.one(tds[2], "a"), "title");
+      // 开盘价。
+      const openPrice = window.mm.textOf(window.mm.one(tds[4], "span"));
+      // 最新价。
+      const latestPrice = window.mm.textOf(window.mm.one(tds[5], "span"));
+      // 最高价。
+      const highPrice = window.mm.textOf(window.mm.one(tds[6], "span"));
+      // 最低价。
+      const lowPrice = window.mm.textOf(window.mm.one(tds[7], "span"));
+      // 涨跌幅。
+      const changePercent = window.mm.textOf(window.mm.one(tds[8], "span"));
+      // 涨跌额。
+      const changeAmount = window.mm.textOf(window.mm.one(tds[9], "span"));
+      // 昨收。
+      const prevClose = window.mm.textOf(window.mm.one(tds[10], "span"));
 
-    const fund = {
-      code,
-      name,
-      openPrice,
-      latestPrice,
-      highPrice,
-      lowPrice,
-      changePercent,
-      changeAmount,
-      prevClose,
-    };
+      const fund = {
+        code,
+        name,
+        openPrice,
+        latestPrice,
+        highPrice,
+        lowPrice,
+        changePercent,
+        changeAmount,
+        prevClose,
+      };
 
-    funds.push(fund);
+      funds.push(fund);
+    }
+  } catch (error) {
+    console.error("获取基金列表失败:", error.message);
+    await window.mm.sleep(30000);
   }
 
-  return funds;
+  return Promise.resolve(funds);
 }
 
 /**
@@ -133,7 +138,7 @@ async function main() {
   console.log("表格已就绪");
 
   while (true) {
-    const funds = getFunds();
+    const funds = await getFunds();
     console.log("基金列表获取完成");
 
     if (funds.length === 0) {
