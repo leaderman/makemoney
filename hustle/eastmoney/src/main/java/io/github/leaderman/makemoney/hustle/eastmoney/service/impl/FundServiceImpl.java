@@ -56,7 +56,8 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             return;
           }
 
-          if (NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
+          if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
+              && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
             String title = String.format("【价格新高】%s", entity.getName());
             String content = String.format("最高价格：%s", entity.getHighPrice());
@@ -67,7 +68,8 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             }
           }
 
-          if (NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
+          if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
+              && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
             String title = String.format("【价格新低】%s", entity.getName());
             String content = String.format("最低价格：%s", entity.getLowPrice());
