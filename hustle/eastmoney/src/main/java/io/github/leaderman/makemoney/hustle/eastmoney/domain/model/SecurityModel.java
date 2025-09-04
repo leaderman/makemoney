@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import io.github.leaderman.makemoney.hustle.domain.model.BaseModel;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.SecurityEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncPositionRequest.Security;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
@@ -53,5 +54,23 @@ public class SecurityModel extends BaseModel {
     model.setDailyProfitLossRatio(NumberUtil.toBigDecimal(dailyProfitLossRatio, BigDecimal.ZERO));
 
     return model;
+  }
+
+  public static SecurityEntity toEntity(SecurityModel model) {
+    SecurityEntity entity = new SecurityEntity();
+
+    entity.setSecurityCode(model.getSecurityCode());
+    entity.setSecurityName(model.getSecurityName());
+    entity.setHoldingQuantity(model.getHoldingQuantity());
+    entity.setAvailableQuantity(model.getAvailableQuantity());
+    entity.setCostPrice(model.getCostPrice());
+    entity.setCurrentPrice(model.getCurrentPrice());
+    entity.setMarketValue(model.getMarketValue());
+    entity.setPositionProfitLoss(model.getPositionProfitLoss());
+    entity.setPositionProfitLossRatio(model.getPositionProfitLossRatio());
+    entity.setDailyProfitLoss(model.getDailyProfitLoss());
+    entity.setDailyProfitLossRatio(model.getDailyProfitLossRatio());
+
+    return entity;
   }
 }

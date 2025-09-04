@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.github.leaderman.makemoney.hustle.domain.model.BaseModel;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.PositionEntity;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.SecurityEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncPositionRequest;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
@@ -48,4 +50,22 @@ public class PositionModel extends BaseModel {
     return model;
   }
 
+  public static PositionEntity toEntity(PositionModel model) {
+    PositionEntity entity = new PositionEntity();
+
+    entity.setTotalAssets(model.getTotalAssets());
+    entity.setSecuritiesMarketValue(model.getSecuritiesMarketValue());
+    entity.setAvailableFunds(model.getAvailableFunds());
+    entity.setPositionProfitLoss(model.getPositionProfitLoss());
+    entity.setCashBalance(model.getCashBalance());
+    entity.setWithdrawableFunds(model.getWithdrawableFunds());
+    entity.setDailyProfitLoss(model.getDailyProfitLoss());
+    entity.setFrozenFunds(model.getFrozenFunds());
+
+    return entity;
+  }
+
+  public static List<SecurityEntity> toEntities(PositionModel model) {
+    return model.getSecurities().stream().map(SecurityModel::toEntity).collect(Collectors.toList());
+  }
 }
