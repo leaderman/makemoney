@@ -52,7 +52,9 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     // 删除实体列表。
     List<Long> deleteIds = new ArrayList<>();
 
-    Map<String, SecurityEntity> leftEntities = securities.stream().map(SecurityModel::toEntity)
+    Map<String, SecurityEntity> leftEntities = securities.stream()
+        .filter(security -> security.getHoldingQuantity() > 0)
+        .map(SecurityModel::toEntity)
         .collect(Collectors.toMap(SecurityEntity::getSecurityCode, Function.identity()));
     Map<String, SecurityEntity> rightEntities = Optional
         .ofNullable(this.lambdaQuery().list())
