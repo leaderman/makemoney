@@ -137,6 +137,8 @@ public class ImClient {
         }
         """;
 
+    System.out.println(String.format(template, content, title, color));
+
     return String.format(template, content, title, color);
   }
 
