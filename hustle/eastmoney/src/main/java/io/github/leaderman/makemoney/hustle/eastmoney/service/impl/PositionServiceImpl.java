@@ -1,5 +1,6 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,9 @@ import io.github.leaderman.makemoney.hustle.eastmoney.mapper.PositionMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.PositionService;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.SecurityService;
 import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
+import io.github.leaderman.makemoney.hustle.feishu.ImClient;
+import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
+import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,16 +35,19 @@ import lombok.extern.slf4j.Slf4j;
 public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEntity> implements PositionService {
   private final ConfigClient configClient;
   private final BitableClient bitableClient;
+  private final ImClient imClient;
 
   private final SecurityService securityService;
 
   private String bitable;
   private String positionTable;
+  private String receiver;
 
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.positionTable = this.configClient.getString("eastmoney.bitable.position");
+    this.receiver = this.configClient.getString("feishu.openid.me");
   }
 
   private void syncDb(PositionModel model) {
@@ -47,6 +55,48 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     if (Objects.isNull(entity)) {
       entity = PositionModel.toEntity(model);
     } else {
+      // 持仓盈亏。
+      if (NumberUtil.lessThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
+        String title = String.format("【持仓盈利】");
+        String content = String.format("盈利金额：%s\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+        try {
+          this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+        } catch (Exception e) {
+          log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      } else if (NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
+        String title = String.format("【持仓亏损】");
+        String content = String.format("亏损金额：%s\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+        try {
+          this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+        } catch (Exception e) {
+          log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
+      // 当日盈亏。
+      if (NumberUtil.lessThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
+        String title = String.format("【当日盈利】");
+        String content = String.format("盈利金额：%s\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+        try {
+          this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+        } catch (Exception e) {
+          log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      } else if (NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
+        String title = String.format("【当日亏损】");
+        String content = String.format("亏损金额：%s\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+        try {
+          this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+        } catch (Exception e) {
+          log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
       entity.setTotalAssets(model.getTotalAssets());
       entity.setSecuritiesMarketValue(model.getSecuritiesMarketValue());
       entity.setAvailableFunds(model.getAvailableFunds());
