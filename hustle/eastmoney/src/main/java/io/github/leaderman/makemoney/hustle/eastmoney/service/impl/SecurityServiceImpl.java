@@ -1,5 +1,6 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +24,9 @@ import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.SecurityModel
 import io.github.leaderman.makemoney.hustle.eastmoney.mapper.SecurityMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.SecurityService;
 import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
+import io.github.leaderman.makemoney.hustle.feishu.ImClient;
+import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
+import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +37,17 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEntity> implements SecurityService {
   private final ConfigClient configClient;
   private final BitableClient bitableClient;
+  private final ImClient imClient;
 
   private String bitable;
   private String securitiesTable;
+  private String receiver;
 
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.securitiesTable = this.configClient.getString("eastmoney.bitable.securities");
+    this.receiver = this.configClient.getString("feishu.openid.me");
   }
 
   private void syncDb(List<SecurityModel> securities) {
@@ -70,8 +78,60 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
         // 创建实体。
         creatEntities.add(security);
       } else {
+        SecurityEntity existingSecurity = rightEntities.get(securityCode);
+
+        // 持仓盈亏。
+        if (NumberUtil.lessThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.greaterThan(security.getPositionProfitLoss(), BigDecimal.ZERO)) {
+          String title = String.format("【持仓盈利】%s", security.getSecurityName());
+          String content = String.format("盈利金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+          } catch (Exception e) {
+            log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        } else if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.lessThan(security.getPositionProfitLoss(), BigDecimal.ZERO)) {
+          String title = String.format("【持仓亏损】%s", security.getSecurityName());
+          String content = String.format("亏损金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+          } catch (Exception e) {
+            log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
+        // 当日盈亏。
+        if (NumberUtil.lessThanOrEqualTo(existingSecurity.getDailyProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.greaterThan(security.getDailyProfitLoss(), BigDecimal.ZERO)) {
+          String title = String.format("【当日盈利】%s", security.getSecurityName());
+          String content = String.format("盈利金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+          } catch (Exception e) {
+            log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        } else if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getDailyProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.lessThan(security.getDailyProfitLoss(), BigDecimal.ZERO)) {
+          String title = String.format("【当日亏损】%s", security.getSecurityName());
+          String content = String.format("亏损金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+          } catch (Exception e) {
+            log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
         // 更新实体。
-        security.setId(rightEntities.get(securityCode).getId());
+        security.setId(existingSecurity.getId());
         updateEntities.add(security);
       }
     }
