@@ -19,6 +19,7 @@ import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FuncMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.FundService;
 import io.github.leaderman.makemoney.hustle.feishu.ImClient;
+import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -56,11 +57,14 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             return;
           }
 
+          // 价格新高。
           if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
             String title = String.format("【价格新高】%s", entity.getName());
-            String content = String.format("最高价格：%s", entity.getHighPrice());
+            String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
+                entity.getLatestPrice(), DatetimeUtil.getDatetime());
+
             try {
               this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
             } catch (Exception e) {
@@ -68,11 +72,14 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             }
           }
 
+          // 价格新低。
           if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
             String title = String.format("【价格新低】%s", entity.getName());
-            String content = String.format("最低价格：%s", entity.getLowPrice());
+            String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
+                DatetimeUtil.getDatetime());
+
             try {
               this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
             } catch (Exception e) {
