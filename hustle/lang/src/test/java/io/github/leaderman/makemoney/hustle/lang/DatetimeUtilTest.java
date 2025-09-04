@@ -18,4 +18,9 @@ public class DatetimeUtilTest {
   public void testGetDate() {
     System.out.println(DatetimeUtil.getDate());
   }
+
+  @Test
+  public void testGetDatetime() {
+    System.out.println(DatetimeUtil.getDatetime());
+  }
 }

@@ -1,14 +1,17 @@
 package io.github.leaderman.makemoney.hustle.lang;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatetimeUtil {
   private static final String DATE_FORMAT = "yyyy-MM-dd";
+  private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
-  private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
+  private static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+  private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
 
   /**
    * 判断日期是否合法，格式：yyyy-MM-dd。
@@ -18,7 +21,7 @@ public class DatetimeUtil {
    */
   public static boolean isDate(String date) {
     try {
-      LocalDate.parse(date, DATE_TIME_FORMATTER);
+      LocalDate.parse(date, DATE_FORMATTER);
       return true;
     } catch (Exception e) {
       return false;
@@ -33,13 +36,13 @@ public class DatetimeUtil {
    * @return 日期列表，格式：yyyy-MM-dd。
    */
   public static List<String> getDatesBetween(String start, String end) {
-    LocalDate startDate = LocalDate.parse(start, DATE_TIME_FORMATTER);
-    LocalDate endDate = LocalDate.parse(end, DATE_TIME_FORMATTER);
+    LocalDate startDate = LocalDate.parse(start, DATE_FORMATTER);
+    LocalDate endDate = LocalDate.parse(end, DATE_FORMATTER);
 
     List<String> dates = new ArrayList<>();
 
     while (!startDate.isAfter(endDate)) {
-      dates.add(startDate.format(DATE_TIME_FORMATTER));
+      dates.add(startDate.format(DATE_FORMATTER));
       startDate = startDate.plusDays(1);
     }
 
@@ -52,6 +55,15 @@ public class DatetimeUtil {
    * @return 当前日期，格式：yyyy-MM-dd。
    */
   public static String getDate() {
-    return LocalDate.now().format(DATE_TIME_FORMATTER);
+    return LocalDate.now().format(DATE_FORMATTER);
+  }
+
+  /**
+   * 获取当前日期时间。
+   * 
+   * @return 当前日期时间，格式：yyyy-MM-dd HH:mm:ss。
+   */
+  public static String getDatetime() {
+    return LocalDateTime.now().format(DATETIME_FORMATTER);
   }
 }
