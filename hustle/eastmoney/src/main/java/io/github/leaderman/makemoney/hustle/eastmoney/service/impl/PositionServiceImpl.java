@@ -59,7 +59,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       if (NumberUtil.lessThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓盈利】");
-        String content = String.format("盈利金额：%s\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
         try {
           this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       } else if (NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓亏损】");
-        String content = String.format("亏损金额：%s\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+        String content = String.format("亏损金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
         try {
           this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       if (NumberUtil.lessThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日盈利】");
-        String content = String.format("盈利金额：%s\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
         try {
           this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       } else if (NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日亏损】");
-        String content = String.format("亏损金额：%s\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+        String content = String.format("亏损金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
         try {
           this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
         } catch (Exception e) {
