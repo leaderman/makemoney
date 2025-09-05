@@ -66,7 +66,7 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 entity.getLatestPrice(), DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+              this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
             } catch (Exception e) {
               log.error("发送价格新高消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
