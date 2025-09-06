@@ -41,13 +41,17 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
 
   private String bitable;
   private String positionTable;
-  private String receiver;
+
+  private String positionProfitChat;
+  private String positionLossChat;
 
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.positionTable = this.configClient.getString("eastmoney.bitable.position");
-    this.receiver = this.configClient.getString("feishu.openid.me");
+
+    this.positionProfitChat = this.configClient.getString("feishu.chat.position.profit");
+    this.positionLossChat = this.configClient.getString("feishu.chat.position.loss");
   }
 
   private void syncDb(PositionModel model) {
@@ -60,8 +64,9 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓盈利】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+
         try {
-          this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+          this.imClient.sendRedMessageByChatId(positionProfitChat, title, content);
         } catch (Exception e) {
           log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -69,8 +74,9 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓亏损】");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+
         try {
-          this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+          this.imClient.sendGreenMessageByChatId(positionLossChat, title, content);
         } catch (Exception e) {
           log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -81,8 +87,9 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日盈利】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+
         try {
-          this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+          this.imClient.sendRedMessageByChatId(positionProfitChat, title, content);
         } catch (Exception e) {
           log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -90,8 +97,9 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日亏损】");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+
         try {
-          this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+          this.imClient.sendGreenMessageByChatId(positionLossChat, title, content);
         } catch (Exception e) {
           log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
