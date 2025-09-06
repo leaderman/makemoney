@@ -32,11 +32,13 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
   private final ConfigClient configClient;
   private final ImClient imClient;
 
-  private String receiver;
+  private String priceHighChat;
+  private String priceLowChat;
 
   @PostConstruct
   public void init() {
-    this.receiver = this.configClient.getString("feishu.openid.me");
+    this.priceHighChat = this.configClient.getString("feishu.chat.price.high");
+    this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
   }
 
   @Override
@@ -66,7 +68,7 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 entity.getLatestPrice(), DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendErrorMessageByOpenId(this.receiver, title, content);
+              this.imClient.sendRedMessageByChatId(priceHighChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新高消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
@@ -81,7 +83,7 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendInfoMessageByOpenId(this.receiver, title, content);
+              this.imClient.sendGreenMessageByChatId(priceLowChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
