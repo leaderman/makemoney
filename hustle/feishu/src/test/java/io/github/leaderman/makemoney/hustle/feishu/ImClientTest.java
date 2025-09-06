@@ -99,4 +99,76 @@ public class ImClientTest {
     String messageId = this.imClient.sendErrorMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "错误标题", "错误内容");
     System.out.println(messageId);
   }
+
+  @Test
+  public void sendBlueMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendBlueMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "蓝色标题", "蓝色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendGreenMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendGreenMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "绿色标题", "绿色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendYellowMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendYellowMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "黄色标题", "黄色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendRedMessageByOpenId() throws Exception {
+    String messageId = this.imClient.sendRedMessageByOpenId("ou_077685426241b03d9e864f775c0ae846", "红色标题", "红色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendDebugMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendDebugMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "调试标题", "调试内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendInfoMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendInfoMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "信息标题", "信息内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendWarnMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendWarnMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "警告标题", "警告内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendErrorMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendErrorMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "错误标题", "错误内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendBlueMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendBlueMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "蓝色标题", "蓝色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendGreenMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendGreenMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "绿色标题", "绿色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendYellowMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendYellowMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "黄色标题", "黄色内容");
+    System.out.println(messageId);
+  }
+
+  @Test
+  public void sendRedMessageByChatId() throws Exception {
+    String messageId = this.imClient.sendRedMessageByChatId("oc_50f45dfbad5a4681fe78bc3fc84ebb41", "红色标题", "红色内容");
+    System.out.println(messageId);
+  }
 }

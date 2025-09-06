@@ -193,6 +193,58 @@ public class ImClient {
   }
 
   /**
+   * 发送蓝色消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendBlueMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendDebugMessageByOpenId(openId, title, content);
+  }
+
+  /**
+   * 发送绿色消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendGreenMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendInfoMessageByOpenId(openId, title, content);
+  }
+
+  /**
+   * 发送黄色消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendYellowMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendWarnMessageByOpenId(openId, title, content);
+  }
+
+  /**
+   * 发送红色消息。
+   * 
+   * @param openId  用户 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendRedMessageByOpenId(String openId, String title, String content) throws Exception {
+    return this.sendErrorMessageByOpenId(openId, title, content);
+  }
+
+  /**
    * 发送消息卡片。
    * 
    * @param chatId 群 ID。
@@ -202,5 +254,109 @@ public class ImClient {
    */
   public String sendInteractiveMessageByChatId(String chatId, String json) throws Exception {
     return this.createMessage("chat_id", chatId, "interactive", json);
+  }
+
+  /**
+   * 发送调试消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendDebugMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByChatId(chatId, this.buildLogMessage(title, content, "blue"));
+  }
+
+  /**
+   * 发送信息消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendInfoMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByChatId(chatId, this.buildLogMessage(title, content, "green"));
+  }
+
+  /**
+   * 发送警告消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendWarnMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByChatId(chatId, this.buildLogMessage(title, content, "yellow"));
+  }
+
+  /**
+   * 发送错误消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendErrorMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendInteractiveMessageByChatId(chatId, this.buildLogMessage(title, content, "red"));
+  }
+
+  /**
+   * 发送蓝色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendBlueMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendDebugMessageByChatId(chatId, title, content);
+  }
+
+  /**
+   * 发送绿色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendGreenMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendInfoMessageByChatId(chatId, title, content);
+  }
+
+  /**
+   * 发送黄色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendYellowMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendWarnMessageByChatId(chatId, title, content);
+  }
+
+  /**
+   * 发送红色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   * @return 消息 ID。
+   * @throws Exception
+   */
+  public String sendRedMessageByChatId(String chatId, String title, String content) throws Exception {
+    return this.sendErrorMessageByChatId(chatId, title, content);
   }
 }
