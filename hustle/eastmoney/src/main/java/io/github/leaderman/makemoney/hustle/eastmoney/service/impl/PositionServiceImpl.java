@@ -42,22 +42,22 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   private String bitable;
   private String positionTable;
 
-  private String positionProfitChat;
-  private String positionLossChat;
+  private String positionProfitTotalChat;
+  private String positionLossTotalChat;
 
-  private String dailyProfitChat;
-  private String dailyLossChat;
+  private String dailyProfitTotalChat;
+  private String dailyLossTotalChat;
 
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.positionTable = this.configClient.getString("eastmoney.bitable.position");
 
-    this.positionProfitChat = this.configClient.getString("feishu.chat.position.profit");
-    this.positionLossChat = this.configClient.getString("feishu.chat.position.loss");
+    this.positionProfitTotalChat = this.configClient.getString("feishu.chat.position.profit.total");
+    this.positionLossTotalChat = this.configClient.getString("feishu.chat.position.loss.total");
 
-    this.dailyProfitChat = this.configClient.getString("feishu.chat.daily.profit");
-    this.dailyLossChat = this.configClient.getString("feishu.chat.daily.loss");
+    this.dailyProfitTotalChat = this.configClient.getString("feishu.chat.daily.profit.total");
+    this.dailyLossTotalChat = this.configClient.getString("feishu.chat.daily.loss.total");
   }
 
   private void syncDb(PositionModel model) {
@@ -72,7 +72,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendRedMessageByChatId(positionProfitChat, title, content);
+          this.imClient.sendRedMessageByChatId(positionProfitTotalChat, title, content);
         } catch (Exception e) {
           log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -82,7 +82,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendGreenMessageByChatId(positionLossChat, title, content);
+          this.imClient.sendGreenMessageByChatId(positionLossTotalChat, title, content);
         } catch (Exception e) {
           log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -95,7 +95,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendRedMessageByChatId(dailyProfitChat, title, content);
+          this.imClient.sendRedMessageByChatId(dailyProfitTotalChat, title, content);
         } catch (Exception e) {
           log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
@@ -105,7 +105,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendGreenMessageByChatId(dailyLossChat, title, content);
+          this.imClient.sendGreenMessageByChatId(dailyLossTotalChat, title, content);
         } catch (Exception e) {
           log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
