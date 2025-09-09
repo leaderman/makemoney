@@ -42,16 +42,22 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   private String bitable;
   private String securitiesTable;
 
-  private String securityProfitChat;
-  private String securityLossChat;
+  private String positionProfitChat;
+  private String positionLossChat;
+
+  private String dailyProfitChat;
+  private String dailyLossChat;
 
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.securitiesTable = this.configClient.getString("eastmoney.bitable.securities");
 
-    this.securityProfitChat = this.configClient.getString("feishu.chat.security.profit");
-    this.securityLossChat = this.configClient.getString("feishu.chat.security.loss");
+    this.positionProfitChat = this.configClient.getString("feishu.chat.position.profit");
+    this.positionLossChat = this.configClient.getString("feishu.chat.position.loss");
+
+    this.dailyProfitChat = this.configClient.getString("feishu.chat.daily.profit");
+    this.dailyLossChat = this.configClient.getString("feishu.chat.daily.loss");
   }
 
   private void syncDb(List<SecurityModel> securities) {
@@ -92,7 +98,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
               DatetimeUtil.getDatetime());
 
           try {
-            this.imClient.sendRedMessageByChatId(securityProfitChat, title, content);
+            this.imClient.sendRedMessageByChatId(positionProfitChat, title, content);
           } catch (Exception e) {
             log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
@@ -103,7 +109,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
               DatetimeUtil.getDatetime());
 
           try {
-            this.imClient.sendGreenMessageByChatId(securityLossChat, title, content);
+            this.imClient.sendGreenMessageByChatId(positionLossChat, title, content);
           } catch (Exception e) {
             log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
@@ -117,7 +123,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
               DatetimeUtil.getDatetime());
 
           try {
-            this.imClient.sendRedMessageByChatId(securityProfitChat, title, content);
+            this.imClient.sendRedMessageByChatId(dailyProfitChat, title, content);
           } catch (Exception e) {
             log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
@@ -128,7 +134,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
               DatetimeUtil.getDatetime());
 
           try {
-            this.imClient.sendGreenMessageByChatId(securityLossChat, title, content);
+            this.imClient.sendGreenMessageByChatId(dailyLossChat, title, content);
           } catch (Exception e) {
             log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
