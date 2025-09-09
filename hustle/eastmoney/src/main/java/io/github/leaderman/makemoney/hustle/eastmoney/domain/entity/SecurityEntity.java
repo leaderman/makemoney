@@ -23,6 +23,10 @@ public class SecurityEntity extends BaseEntity {
   private BigDecimal marketValue;
   private BigDecimal positionProfitLoss;
   private BigDecimal positionProfitLossRatio;
+  private BigDecimal positionProfitLossMax;
+  private BigDecimal positionProfitLossMin;
   private BigDecimal dailyProfitLoss;
   private BigDecimal dailyProfitLossRatio;
+  private BigDecimal dailyProfitLossMax;
+  private BigDecimal dailyProfitLossMin;
 }

@@ -45,8 +45,14 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   private String positionProfitSecurityChat;
   private String positionLossSecurityChat;
 
+  private String positionProfitHighSecurityChat;
+  private String positionLossLowSecurityChat;
+
   private String dailyProfitSecurityChat;
   private String dailyLossSecurityChat;
+
+  private String dailyProfitHighSecurityChat;
+  private String dailyLossLowSecurityChat;
 
   @PostConstruct
   public void init() {
@@ -56,8 +62,14 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     this.positionProfitSecurityChat = this.configClient.getString("feishu.chat.position.profit.security");
     this.positionLossSecurityChat = this.configClient.getString("feishu.chat.position.loss.security");
 
+    this.positionProfitHighSecurityChat = this.configClient.getString("feishu.chat.position.profit.high.security");
+    this.positionLossLowSecurityChat = this.configClient.getString("feishu.chat.position.loss.low.security");
+
     this.dailyProfitSecurityChat = this.configClient.getString("feishu.chat.daily.profit.security");
     this.dailyLossSecurityChat = this.configClient.getString("feishu.chat.daily.loss.security");
+
+    this.dailyProfitHighSecurityChat = this.configClient.getString("feishu.chat.daily.profit.high.security");
+    this.dailyLossLowSecurityChat = this.configClient.getString("feishu.chat.daily.loss.low.security");
   }
 
   private void syncDb(List<SecurityModel> securities) {
@@ -90,7 +102,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       } else {
         SecurityEntity existingSecurity = rightEntities.get(securityCode);
 
-        // 持仓盈亏。
+        // 持仓盈利。
         if (NumberUtil.lessThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
             && NumberUtil.greaterThan(security.getPositionProfitLoss(), BigDecimal.ZERO)) {
           String title = String.format("【持仓盈利】%s", security.getSecurityName());
@@ -102,7 +114,10 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           } catch (Exception e) {
             log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
-        } else if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
+        }
+
+        // 持仓亏损。
+        if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
             && NumberUtil.lessThan(security.getPositionProfitLoss(), BigDecimal.ZERO)) {
           String title = String.format("【持仓亏损】%s", security.getSecurityName());
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
@@ -115,7 +130,35 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           }
         }
 
-        // 当日盈亏。
+        // 持仓盈利新高。
+        if (NumberUtil.greaterThan(security.getPositionProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.greaterThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMax())) {
+          String title = String.format("【持仓盈利新高】%s", security.getSecurityName());
+          String content = String.format("盈利金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendRedMessageByChatId(positionProfitHighSecurityChat, title, content);
+          } catch (Exception e) {
+            log.error("发送持仓盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
+        // 持仓亏损新低。
+        if (NumberUtil.lessThan(security.getPositionProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.lessThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMin())) {
+          String title = String.format("【持仓亏损新低】%s", security.getSecurityName());
+          String content = String.format("亏损金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendGreenMessageByChatId(positionLossLowSecurityChat, title, content);
+          } catch (Exception e) {
+            log.error("发送持仓亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
+        // 当日盈利。
         if (NumberUtil.lessThanOrEqualTo(existingSecurity.getDailyProfitLoss(), BigDecimal.ZERO)
             && NumberUtil.greaterThan(security.getDailyProfitLoss(), BigDecimal.ZERO)) {
           String title = String.format("【当日盈利】%s", security.getSecurityName());
@@ -127,7 +170,10 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           } catch (Exception e) {
             log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
           }
-        } else if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getDailyProfitLoss(), BigDecimal.ZERO)
+        }
+
+        // 当日亏损。
+        if (NumberUtil.greaterThanOrEqualTo(existingSecurity.getDailyProfitLoss(), BigDecimal.ZERO)
             && NumberUtil.lessThan(security.getDailyProfitLoss(), BigDecimal.ZERO)) {
           String title = String.format("【当日亏损】%s", security.getSecurityName());
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
@@ -140,8 +186,55 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           }
         }
 
+        // 当日盈利新高。
+        if (NumberUtil.greaterThan(security.getDailyProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.greaterThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMax())) {
+          String title = String.format("【当日盈利新高】%s", security.getSecurityName());
+          String content = String.format("盈利金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendRedMessageByChatId(dailyProfitHighSecurityChat, title, content);
+          } catch (Exception e) {
+            log.error("发送当日盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
+        // 当日亏损新低。
+        if (NumberUtil.lessThan(security.getDailyProfitLoss(), BigDecimal.ZERO)
+            && NumberUtil.lessThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMin())) {
+          String title = String.format("【当日亏损新低】%s", security.getSecurityName());
+          String content = String.format("亏损金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
+              DatetimeUtil.getDatetime());
+
+          try {
+            this.imClient.sendGreenMessageByChatId(dailyLossLowSecurityChat, title, content);
+          } catch (Exception e) {
+            log.error("发送当日亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+          }
+        }
+
         // 更新实体。
         security.setId(existingSecurity.getId());
+
+        if (NumberUtil.greaterThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMax())
+            || NumberUtil.equals(existingSecurity.getPositionProfitLossMax(), BigDecimal.ZERO)) {
+          security.setPositionProfitLossMax(security.getPositionProfitLoss());
+        }
+        if (NumberUtil.lessThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMin())
+            || NumberUtil.equals(existingSecurity.getPositionProfitLossMin(), BigDecimal.ZERO)) {
+          security.setPositionProfitLossMin(security.getPositionProfitLoss());
+        }
+
+        if (NumberUtil.greaterThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMax())
+            || NumberUtil.equals(existingSecurity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
+          security.setDailyProfitLossMax(security.getDailyProfitLoss());
+        }
+        if (NumberUtil.lessThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMin())
+            || NumberUtil.equals(existingSecurity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
+          security.setDailyProfitLossMin(security.getDailyProfitLoss());
+        }
+
         updateEntities.add(security);
       }
     }

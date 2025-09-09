@@ -24,8 +24,12 @@ public class SecurityModel extends BaseModel {
   private BigDecimal marketValue;
   private BigDecimal positionProfitLoss;
   private BigDecimal positionProfitLossRatio;
+  private BigDecimal positionProfitLossMax;
+  private BigDecimal positionProfitLossMin;
   private BigDecimal dailyProfitLoss;
   private BigDecimal dailyProfitLossRatio;
+  private BigDecimal dailyProfitLossMax;
+  private BigDecimal dailyProfitLossMin;
 
   public static SecurityModel from(Security security) {
     SecurityModel model = new SecurityModel();
@@ -68,8 +72,12 @@ public class SecurityModel extends BaseModel {
     entity.setMarketValue(model.getMarketValue());
     entity.setPositionProfitLoss(model.getPositionProfitLoss());
     entity.setPositionProfitLossRatio(model.getPositionProfitLossRatio());
+    entity.setPositionProfitLossMax(model.getPositionProfitLossMax());
+    entity.setPositionProfitLossMin(model.getPositionProfitLossMin());
     entity.setDailyProfitLoss(model.getDailyProfitLoss());
     entity.setDailyProfitLossRatio(model.getDailyProfitLossRatio());
+    entity.setDailyProfitLossMax(model.getDailyProfitLossMax());
+    entity.setDailyProfitLossMin(model.getDailyProfitLossMin());
 
     return entity;
   }
