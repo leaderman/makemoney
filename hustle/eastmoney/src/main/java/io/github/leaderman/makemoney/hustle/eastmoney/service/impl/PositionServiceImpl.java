@@ -46,13 +46,13 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   private String positionLossTotalChat;
 
   private String positionProfitHighTotalChat;
-  private String positionProfitLowTotalChat;
+  private String positionLossLowTotalChat;
 
   private String dailyProfitTotalChat;
   private String dailyLossTotalChat;
 
   private String dailyProfitHighTotalChat;
-  private String dailyProfitLowTotalChat;
+  private String dailyLossLowTotalChat;
 
   @PostConstruct
   public void init() {
@@ -63,13 +63,13 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     this.positionLossTotalChat = this.configClient.getString("feishu.chat.position.loss.total");
 
     this.positionProfitHighTotalChat = this.configClient.getString("feishu.chat.position.profit.high.total");
-    this.positionProfitLowTotalChat = this.configClient.getString("feishu.chat.position.profit.low.total");
+    this.positionLossLowTotalChat = this.configClient.getString("feishu.chat.position.loss.low.total");
 
     this.dailyProfitTotalChat = this.configClient.getString("feishu.chat.daily.profit.total");
     this.dailyLossTotalChat = this.configClient.getString("feishu.chat.daily.loss.total");
 
     this.dailyProfitHighTotalChat = this.configClient.getString("feishu.chat.daily.profit.high.total");
-    this.dailyProfitLowTotalChat = this.configClient.getString("feishu.chat.daily.profit.low.total");
+    this.dailyLossLowTotalChat = this.configClient.getString("feishu.chat.daily.loss.low.total");
   }
 
   private void syncDb(PositionModel model) {
@@ -104,7 +104,8 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       }
 
       // 持仓盈利新高。
-      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
+      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
         String title = String.format("【持仓盈利新高】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
@@ -115,15 +116,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 持仓盈利新低。
-      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
-        String title = String.format("【持仓盈利新低】");
+      // 持仓亏损新低。
+      if (NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
+        String title = String.format("【持仓亏损新低】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendGreenMessageByChatId(positionProfitLowTotalChat, title, content);
+          this.imClient.sendGreenMessageByChatId(positionLossLowTotalChat, title, content);
         } catch (Exception e) {
-          log.error("发送持仓盈利新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+          log.error("发送持仓亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
       }
 
@@ -154,7 +156,8 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       }
 
       // 当日盈利新高。
-      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
+      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
         String title = String.format("【当日盈利新高】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
@@ -165,13 +168,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日盈利新低。
-      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
+      // 当日亏损新低。
+      if (NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
         String title = String.format("【当日盈利新低】");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
-          this.imClient.sendGreenMessageByChatId(dailyProfitLowTotalChat, title, content);
+          this.imClient.sendGreenMessageByChatId(dailyLossLowTotalChat, title, content);
         } catch (Exception e) {
           log.error("发送当日盈利新低消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
