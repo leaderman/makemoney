@@ -45,8 +45,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   private String positionProfitTotalChat;
   private String positionLossTotalChat;
 
+  private String positionProfitHighTotalChat;
+  private String positionProfitLowTotalChat;
+
   private String dailyProfitTotalChat;
   private String dailyLossTotalChat;
+
+  private String dailyProfitHighTotalChat;
+  private String dailyProfitLowTotalChat;
 
   @PostConstruct
   public void init() {
@@ -56,8 +62,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     this.positionProfitTotalChat = this.configClient.getString("feishu.chat.position.profit.total");
     this.positionLossTotalChat = this.configClient.getString("feishu.chat.position.loss.total");
 
+    this.positionProfitHighTotalChat = this.configClient.getString("feishu.chat.position.profit.high.total");
+    this.positionProfitLowTotalChat = this.configClient.getString("feishu.chat.position.profit.low.total");
+
     this.dailyProfitTotalChat = this.configClient.getString("feishu.chat.daily.profit.total");
     this.dailyLossTotalChat = this.configClient.getString("feishu.chat.daily.loss.total");
+
+    this.dailyProfitHighTotalChat = this.configClient.getString("feishu.chat.daily.profit.high.total");
+    this.dailyProfitLowTotalChat = this.configClient.getString("feishu.chat.daily.profit.low.total");
   }
 
   private void syncDb(PositionModel model) {
@@ -65,7 +77,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     if (Objects.isNull(entity)) {
       entity = PositionModel.toEntity(model);
     } else {
-      // 持仓盈亏。
+      // 持仓盈利。
       if (NumberUtil.lessThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓盈利】");
@@ -76,7 +88,10 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         } catch (Exception e) {
           log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
-      } else if (NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
+      }
+
+      // 持仓亏损。
+      if (NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【持仓亏损】");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
@@ -88,7 +103,31 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日盈亏。
+      // 持仓盈利新高。
+      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
+        String title = String.format("【持仓盈利新高】");
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+
+        try {
+          this.imClient.sendRedMessageByChatId(positionProfitHighTotalChat, title, content);
+        } catch (Exception e) {
+          log.error("发送持仓盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
+      // 持仓盈利新低。
+      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
+        String title = String.format("【持仓盈利新低】");
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
+
+        try {
+          this.imClient.sendGreenMessageByChatId(positionProfitLowTotalChat, title, content);
+        } catch (Exception e) {
+          log.error("发送持仓盈利新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
+      // 当日盈利。
       if (NumberUtil.lessThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日盈利】");
@@ -99,7 +138,10 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         } catch (Exception e) {
           log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
         }
-      } else if (NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
+      }
+
+      // 当日亏损。
+      if (NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
         String title = String.format("【当日亏损】");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
@@ -111,13 +153,57 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
+      // 当日盈利新高。
+      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
+        String title = String.format("【当日盈利新高】");
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+
+        try {
+          this.imClient.sendRedMessageByChatId(dailyProfitHighTotalChat, title, content);
+        } catch (Exception e) {
+          log.error("发送当日盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
+      // 当日盈利新低。
+      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
+        String title = String.format("【当日盈利新低】");
+        String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+
+        try {
+          this.imClient.sendGreenMessageByChatId(dailyProfitLowTotalChat, title, content);
+        } catch (Exception e) {
+          log.error("发送当日盈利新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+        }
+      }
+
       entity.setTotalAssets(model.getTotalAssets());
       entity.setSecuritiesMarketValue(model.getSecuritiesMarketValue());
       entity.setAvailableFunds(model.getAvailableFunds());
+
       entity.setPositionProfitLoss(model.getPositionProfitLoss());
+      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
+          || NumberUtil.equals(entity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
+        entity.setPositionProfitLossMax(model.getPositionProfitLoss());
+      }
+      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
+          || NumberUtil.equals(entity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
+        entity.setPositionProfitLossMin(model.getPositionProfitLoss());
+      }
+
       entity.setCashBalance(model.getCashBalance());
       entity.setWithdrawableFunds(model.getWithdrawableFunds());
+
       entity.setDailyProfitLoss(model.getDailyProfitLoss());
+      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
+          || NumberUtil.equals(entity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
+        entity.setDailyProfitLossMax(model.getDailyProfitLoss());
+      }
+      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
+          || NumberUtil.equals(entity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
+        entity.setDailyProfitLossMin(model.getDailyProfitLoss());
+      }
+
       entity.setFrozenFunds(model.getFrozenFunds());
     }
 

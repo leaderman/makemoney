@@ -18,8 +18,12 @@ public class PositionEntity extends BaseEntity {
   private BigDecimal securitiesMarketValue;
   private BigDecimal availableFunds;
   private BigDecimal positionProfitLoss;
+  private BigDecimal positionProfitLossMax;
+  private BigDecimal positionProfitLossMin;
   private BigDecimal cashBalance;
   private BigDecimal withdrawableFunds;
   private BigDecimal dailyProfitLoss;
+  private BigDecimal dailyProfitLossMax;
+  private BigDecimal dailyProfitLossMin;
   private BigDecimal frozenFunds;
 }
