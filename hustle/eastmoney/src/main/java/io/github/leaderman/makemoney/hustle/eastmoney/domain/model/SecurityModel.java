@@ -49,6 +49,9 @@ public class SecurityModel extends BaseModel {
     }
     model.setPositionProfitLossRatio(NumberUtil.toBigDecimal(positionProfitLossRatio, BigDecimal.ZERO));
 
+    model.setPositionProfitLossMax(model.getPositionProfitLoss());
+    model.setPositionProfitLossMin(model.getPositionProfitLoss());
+
     model.setDailyProfitLoss(NumberUtil.toBigDecimal(security.getDailyProfitLoss(), BigDecimal.ZERO));
 
     String dailyProfitLossRatio = security.getDailyProfitLossRatio();
@@ -56,6 +59,9 @@ public class SecurityModel extends BaseModel {
       dailyProfitLossRatio = dailyProfitLossRatio.substring(0, dailyProfitLossRatio.length() - 1);
     }
     model.setDailyProfitLossRatio(NumberUtil.toBigDecimal(dailyProfitLossRatio, BigDecimal.ZERO));
+
+    model.setDailyProfitLossMax(model.getDailyProfitLoss());
+    model.setDailyProfitLossMin(model.getDailyProfitLoss());
 
     return model;
   }
