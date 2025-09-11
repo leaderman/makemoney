@@ -95,46 +95,44 @@ async function waitForData() {
 }
 
 async function main() {
+  window.mm.setTitle("当日成交");
+
   // 等待数据。
-  console.log("等待当日成交数据...");
-  await waitForData();
-  console.log("当日成交数据已就绪");
-
+  // console.log("等待当日成交数据...");
+  // await waitForData();
+  // console.log("当日成交数据已就绪");
   // 获取委托列表。
-  const deals = getDeals();
-  console.log("成交列表：", deals.length);
-
-  for (const deal of deals) {
-    console.log(
-      "成交时间：",
-      deal.executionTime,
-      "，证券代码：",
-      deal.securityCode,
-      "，证券名称：",
-      deal.securityName,
-      "，委托方向：",
-      deal.orderSide,
-      "，成交数量：",
-      deal.executedQuantity,
-      "，成交价格：",
-      deal.executedPrice,
-      "，成交金额：",
-      deal.executedAmount,
-      "，委托编号：",
-      deal.orderId,
-      "，成交编号：",
-      deal.executionId,
-      "，交易市场：",
-      deal.market,
-      "，币种：",
-      deal.currency
-    );
-  }
-
-  console.log("当日成交数据解析完成");
-
+  // const deals = getDeals();
+  // console.log("成交列表：", deals.length);
+  // for (const deal of deals) {
+  //   console.log(
+  //     "成交时间：",
+  //     deal.executionTime,
+  //     "，证券代码：",
+  //     deal.securityCode,
+  //     "，证券名称：",
+  //     deal.securityName,
+  //     "，委托方向：",
+  //     deal.orderSide,
+  //     "，成交数量：",
+  //     deal.executedQuantity,
+  //     "，成交价格：",
+  //     deal.executedPrice,
+  //     "，成交金额：",
+  //     deal.executedAmount,
+  //     "，委托编号：",
+  //     deal.orderId,
+  //     "，成交编号：",
+  //     deal.executionId,
+  //     "，交易市场：",
+  //     deal.market,
+  //     "，币种：",
+  //     deal.currency
+  //   );
+  // }
+  // console.log("当日成交数据解析完成");
   // 等待页面重新加载
-  console.log("等待页面重新加载...");
-  await window.mm.sleep(3000);
+  // console.log("等待页面重新加载...");
+  // await window.mm.sleep(3000);
   // window.mm.reload();
 }

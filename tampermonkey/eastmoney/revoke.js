@@ -95,46 +95,44 @@ async function waitForData() {
 }
 
 async function main() {
+  window.mm.setTitle("撤单");
+
   // 等待数据。
-  console.log("等待撤单数据...");
-  await waitForData();
-  console.log("撤单数据已就绪");
-
+  // console.log("等待撤单数据...");
+  // await waitForData();
+  // console.log("撤单数据已就绪");
   // 获取委托列表。
-  const revokes = getRevokes();
-  console.log("撤单列表：", revokes.length);
-
-  for (const revoke of revokes) {
-    console.log(
-      "委托时间：",
-      revoke.orderTime,
-      "，证券代码：",
-      revoke.securityCode,
-      "，证券名称：",
-      revoke.securityName,
-      "，委托方向：",
-      revoke.orderSide,
-      "，委托数量：",
-      revoke.orderQuantity,
-      "，委托状态：",
-      revoke.orderStatus,
-      "，委托价格：",
-      revoke.orderPrice,
-      "，成交数量：",
-      revoke.filledQuantity,
-      "，成交金额：",
-      revoke.filledAmount,
-      "，成交价格：",
-      revoke.avgFilledPrice,
-      "，委托编号：",
-      revoke.orderId
-    );
-  }
-
-  console.log("撤单数据解析完成");
-
+  // const revokes = getRevokes();
+  // console.log("撤单列表：", revokes.length);
+  // for (const revoke of revokes) {
+  //   console.log(
+  //     "委托时间：",
+  //     revoke.orderTime,
+  //     "，证券代码：",
+  //     revoke.securityCode,
+  //     "，证券名称：",
+  //     revoke.securityName,
+  //     "，委托方向：",
+  //     revoke.orderSide,
+  //     "，委托数量：",
+  //     revoke.orderQuantity,
+  //     "，委托状态：",
+  //     revoke.orderStatus,
+  //     "，委托价格：",
+  //     revoke.orderPrice,
+  //     "，成交数量：",
+  //     revoke.filledQuantity,
+  //     "，成交金额：",
+  //     revoke.filledAmount,
+  //     "，成交价格：",
+  //     revoke.avgFilledPrice,
+  //     "，委托编号：",
+  //     revoke.orderId
+  //   );
+  // }
+  // console.log("撤单数据解析完成");
   // 等待页面重新加载
-  console.log("等待页面重新加载...");
-  await window.mm.sleep(3000);
+  // console.log("等待页面重新加载...");
+  // await window.mm.sleep(3000);
   // window.mm.reload();
 }
