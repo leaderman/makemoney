@@ -243,3 +243,11 @@ window.mm.attribute = function (selector, name) {
 window.mm.attributeOf = function (el, name) {
   return el?.getAttribute(name) || "";
 };
+
+/**
+ * 设置标题。
+ * @param {string} title 标题。
+ */
+window.mm.setTitle = function (title) {
+  document.title = title;
+};
