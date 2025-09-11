@@ -262,6 +262,8 @@ async function syncPosition(position) {
  * 主函数。
  */
 async function main() {
+  window.mm.setTitle("资金持仓");
+
   // 等待数据。
   console.log("等待资金持仓数据...");
   await waitForData();

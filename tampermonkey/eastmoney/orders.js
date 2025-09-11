@@ -185,6 +185,8 @@ async function waitForPage(page) {
  * 主函数。
  */
 async function main() {
+  window.mm.setTitle("当日委托");
+
   // 等待数据。
   console.log("等待当日委托数据...");
   await waitForData();

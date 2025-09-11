@@ -133,6 +133,8 @@ async function syncFunds(funds) {
  * 主函数。
  */
 async function main() {
+  window.mm.setTitle("自选股");
+
   console.log("等待表格...");
   await waitForTable();
   console.log("表格已就绪");
