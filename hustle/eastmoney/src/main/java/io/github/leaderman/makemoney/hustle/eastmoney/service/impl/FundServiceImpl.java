@@ -18,6 +18,7 @@ import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FuncMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.FundService;
+import io.github.leaderman.makemoney.hustle.eastmoney.service.SecurityService;
 import io.github.leaderman.makemoney.hustle.feishu.ImClient;
 import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
@@ -32,11 +33,19 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
   private final ConfigClient configClient;
   private final ImClient imClient;
 
+  private final SecurityService securityService;
+
+  private String positionPriceHighChat;
+  private String positionPriceLowChat;
+
   private String priceHighChat;
   private String priceLowChat;
 
   @PostConstruct
   public void init() {
+    this.positionPriceHighChat = this.configClient.getString("feishu.chat.position.price.high");
+    this.positionPriceLowChat = this.configClient.getString("feishu.chat.position.price.low");
+
     this.priceHighChat = this.configClient.getString("feishu.chat.price.high");
     this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
   }
@@ -68,7 +77,9 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 entity.getLatestPrice(), DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendRedMessageByChatId(priceHighChat, title, content);
+              this.imClient.sendRedMessageByChatId(
+                  securityService.hasPosition(entity.getCode()) ? positionPriceHighChat : priceHighChat, title,
+                  content);
             } catch (Exception e) {
               log.error("发送价格新高消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
@@ -83,7 +94,8 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendGreenMessageByChatId(priceLowChat, title, content);
+              this.imClient.sendGreenMessageByChatId(
+                  securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
             }

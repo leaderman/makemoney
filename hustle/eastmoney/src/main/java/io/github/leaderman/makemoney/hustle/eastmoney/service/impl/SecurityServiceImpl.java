@@ -354,4 +354,9 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       throw new RuntimeException(e);
     }
   }
+
+  @Override
+  public boolean hasPosition(String securityCode) {
+    return this.lambdaQuery().eq(SecurityEntity::getSecurityCode, securityCode).exists();
+  }
 }
