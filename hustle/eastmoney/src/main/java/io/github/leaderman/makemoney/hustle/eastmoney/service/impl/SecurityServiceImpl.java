@@ -217,22 +217,18 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
         // 更新实体。
         security.setId(existingSecurity.getId());
 
-        if (NumberUtil.greaterThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMax())
-            || NumberUtil.equals(existingSecurity.getPositionProfitLossMax(), BigDecimal.ZERO)) {
-          security.setPositionProfitLossMax(security.getPositionProfitLoss());
+        if (NumberUtil.greaterThan(existingSecurity.getPositionProfitLossMax(), security.getPositionProfitLoss())) {
+          security.setPositionProfitLossMax(existingSecurity.getPositionProfitLossMax());
         }
-        if (NumberUtil.lessThan(security.getPositionProfitLoss(), existingSecurity.getPositionProfitLossMin())
-            || NumberUtil.equals(existingSecurity.getPositionProfitLossMin(), BigDecimal.ZERO)) {
-          security.setPositionProfitLossMin(security.getPositionProfitLoss());
+        if (NumberUtil.lessThan(existingSecurity.getPositionProfitLossMin(), security.getPositionProfitLoss())) {
+          security.setPositionProfitLossMin(existingSecurity.getPositionProfitLossMin());
         }
 
-        if (NumberUtil.greaterThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMax())
-            || NumberUtil.equals(existingSecurity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
-          security.setDailyProfitLossMax(security.getDailyProfitLoss());
+        if (NumberUtil.greaterThan(existingSecurity.getDailyProfitLossMax(), security.getDailyProfitLoss())) {
+          security.setDailyProfitLossMax(existingSecurity.getDailyProfitLossMax());
         }
-        if (NumberUtil.lessThan(security.getDailyProfitLoss(), existingSecurity.getDailyProfitLossMin())
-            || NumberUtil.equals(existingSecurity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
-          security.setDailyProfitLossMin(security.getDailyProfitLoss());
+        if (NumberUtil.lessThan(existingSecurity.getDailyProfitLossMin(), security.getDailyProfitLoss())) {
+          security.setDailyProfitLossMin(existingSecurity.getDailyProfitLossMin());
         }
 
         updateEntities.add(security);
