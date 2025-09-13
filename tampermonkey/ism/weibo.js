@@ -64,7 +64,11 @@ function getFeed(feed) {
  */
 async function push(feed) {
   try {
-    await window.mm.post(URL, { feed }, { Authorization: "Bearer " + TOKEN });
+    await window.mm.post(
+      URL,
+      { href: feed.href, html: feed.html },
+      { Authorization: "Bearer " + TOKEN }
+    );
   } catch (error) {
     console.error("推送微博失败:", error.message);
 

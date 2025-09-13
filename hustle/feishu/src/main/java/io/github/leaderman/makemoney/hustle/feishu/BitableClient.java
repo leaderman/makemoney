@@ -3,6 +3,7 @@ package io.github.leaderman.makemoney.hustle.feishu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.lark.oapi.service.bitable.v1.model.AppTable;
@@ -330,7 +332,57 @@ public class BitableClient {
       @SuppressWarnings("unchecked")
       List<Map<String, String>> values = (List<Map<String, String>>) record.getFields().get(name);
       if (CollectionUtils.isNotEmpty(values)) {
-        return values.get(0).get("text");
+        String value = values.get(0).get("text");
+        if (StringUtils.isNotEmpty(value)) {
+          return value;
+        }
+      }
+    }
+
+    throw new RuntimeException(String.format("获取 AI 输出超时：%s", recordId));
+  }
+
+  /**
+   * 获取多维表格的记录的 AI 输出。
+   * 
+   * @param appToken      多维表格的唯一标识。
+   * @param tableId       数据表的唯一标识。
+   * @param recordId      记录的唯一标识。
+   * @param names         字段名称列表。
+   * @param maxRetries    最大重试次数。
+   * @param retryInterval 重试间隔时间（秒）。
+   * @return AI 输出。
+   * @throws Exception
+   */
+  public Map<String, String> getAiOutput(String appToken, String tableId, String recordId, List<String> names,
+      int maxRetries, int retryInterval) throws Exception {
+    for (int retry = 0; retry < maxRetries; retry++) {
+      Thread.sleep(retryInterval * 1000);
+
+      AppTableRecord record = getRecord(appToken, tableId, recordId);
+      if (record == null) {
+        throw new RuntimeException(String.format("记录不存在：%s", recordId));
+      }
+
+      Map<String, String> output = new HashMap<>();
+
+      for (String name : names) {
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> values = (List<Map<String, String>>) record.getFields().get(name);
+        if (CollectionUtils.isEmpty(values)) {
+          break;
+        }
+
+        String value = values.get(0).get("text");
+        if (StringUtils.isEmpty(value)) {
+          break;
+        }
+
+        output.put(name, value);
+      }
+
+      if (output.size() == names.size()) {
+        return output;
       }
     }
 
