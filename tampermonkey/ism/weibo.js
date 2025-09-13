@@ -5,7 +5,12 @@
 // @description  微博投资舆情监测
 // @match        https://weibo.com/mygroups?gid=5210361993364437
 // @require      https://raw.githubusercontent.com/leaderman/makemoney/refs/heads/main/tampermonkey/common.js
+// @connect      *
+// @grant        GM_xmlhttpRequest
 // ==/UserScript==
+
+const URL = "xxx";
+const TOKEN = "xxx";
 
 /**
  * 获取信息流列表。
@@ -54,6 +59,20 @@ function getFeed(feed) {
 }
 
 /**
+ * 推送微博。
+ * @param {Object} feed 微博对象。
+ */
+async function push(feed) {
+  try {
+    await window.mm.post(URL, { feed }, { Authorization: "Bearer " + TOKEN });
+  } catch (error) {
+    console.error("推送微博失败:", error.message);
+
+    await window.mm.sleep(30000);
+  }
+}
+
+/**
  * 主函数。
  */
 async function main() {
@@ -79,6 +98,7 @@ async function main() {
 
       console.log("微博链接：", href);
       console.log("微博源码：", html);
+      await push({ href, html });
     }
 
     console.log("微博数量：", hrefs.size);

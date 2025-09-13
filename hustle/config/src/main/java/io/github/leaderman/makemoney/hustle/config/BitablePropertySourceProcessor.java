@@ -63,11 +63,17 @@ public class BitablePropertySourceProcessor implements EnvironmentPostProcessor,
       for (String bitable : bitables) {
         List<AppTableRecord> records = this.listRecords(client, bitable);
         for (AppTableRecord record : records) {
+          String name = record.getFields().get("名称").toString();
+          if (this.source.containsKey(name)) {
+            System.err.println("多维表格加载配置已存在：" + name);
+          }
+
           this.source.put(record.getFields().get("名称").toString(), record.getFields().get("值"));
         }
       }
+      System.out.println("多维表格加载配置完成");
     } catch (Exception e) {
-      throw new RuntimeException("多维表格加载或刷新配置错误", e);
+      throw new RuntimeException("多维表格加载配置错误", e);
     }
   }
 
