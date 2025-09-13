@@ -1,6 +1,5 @@
 package io.github.leaderman.makemoney.hustle.ism.web.controller;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,14 +21,11 @@ public class PushController {
 
   @PostMapping("/weibo")
   public Response<Void> pushWeibo(@RequestBody PushWeiboRequest request) {
-    try {
-      WeiboModel model = WeiboModel.from(request);
-      insightService.insight(model);
+    WeiboModel model = WeiboModel.from(request);
 
-      return Response.ok();
-    } catch (Exception e) {
-      log.error("洞察微博错误：{}", ExceptionUtils.getStackTrace(e));
-      return Response.internalServerError();
-    }
+    insightService.insight(model);
+    log.info("微博 {} 洞察已提交", model.getHref());
+
+    return Response.ok();
   }
 }
