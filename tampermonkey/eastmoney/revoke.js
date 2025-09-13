@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Revoke
+// @name         EastMoneyRevoke
 // @namespace    MakeMoney
 // @version      2025-08-23
 // @description  东方财富撤单

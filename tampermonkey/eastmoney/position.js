@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Position
+// @name         EastMoneyPosition
 // @namespace    MakeMoney
 // @version      2025-08-23
 // @description  东方财富资金持仓

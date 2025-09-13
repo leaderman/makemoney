@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Orders
+// @name         EastMoneyOrders
 // @namespace    MakeMoney
 // @version      2025-08-23
 // @description  东方财富当日委托

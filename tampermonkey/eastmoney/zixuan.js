@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Zixuan
+// @name         EastMoneyZixuan
 // @namespace    MakeMoney
 // @version      2025-08-23
 // @description  东方财富自选股（盯盘）

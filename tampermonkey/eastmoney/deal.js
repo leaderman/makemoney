@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Deal
+// @name         EastMoneyDeal
 // @namespace    MakeMoney
 // @version      2025-08-23
 // @description  东方财富当日成交
