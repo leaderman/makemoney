@@ -225,6 +225,18 @@ window.mm.click = function (selector) {
 };
 
 /**
+ * 点击元素。
+ * @param {Node} root 根元素。
+ * @param {string} selector 选择器。
+ */
+window.mm.clickOf = function (root, selector) {
+  const el = root.querySelector(selector);
+  if (el) {
+    el.click();
+  }
+};
+
+/**
  * 获取元素的属性值。
  * @param {string} selector 选择器。
  * @param {string} name 属性名称。
