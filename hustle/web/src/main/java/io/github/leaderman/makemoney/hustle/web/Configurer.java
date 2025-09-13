@@ -1,9 +1,9 @@
 package io.github.leaderman.makemoney.hustle.web;
 
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -31,12 +31,22 @@ public class Configurer implements WebMvcConfigurer {
   }
 
   @Bean
-  ApplicationRunner redisInfo(org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory f,
-      StringRedisTemplate tpl) {
+  ApplicationRunner dumpRedis(ConfigurableApplicationContext ctx) {
+    var bf = ctx.getBeanFactory();
+
+    System.out.println("=== RedisConnectionFactory beans ===");
+    bf.getBeansOfType(org.springframework.data.redis.connection.RedisConnectionFactory.class)
+        .forEach((name, bean) -> {
+          var src = bf.getBeanDefinition(name).getResourceDescription();
+          System.out.printf("- %s -> %s | source=%s%n", name, bean.getClass().getName(), src);
+        });
+
+    bf.getBeansOfType(org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory.class)
+        .forEach((name, f) -> System.out.printf(
+            ">>>> %s host=%s port=%d db=%d username=%s%n",
+            name, f.getHostName(), f.getPort(), f.getDatabase(), "none"));
+
     return args -> {
-      System.out.printf("[REDIS] host=%s, port=%d%n",
-          f.getHostName(), f.getPort());
-      System.out.println("[REDIS] CF from template same? " + (tpl.getConnectionFactory() == f));
     };
   }
 
