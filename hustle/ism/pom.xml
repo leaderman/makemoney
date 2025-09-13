@@ -10,15 +10,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>hustle-web</artifactId>
+    <artifactId>hustle-ism</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-config</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
             <artifactId>hustle-domain</artifactId>
@@ -27,13 +21,19 @@
 
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-eastmoney</artifactId>
+            <artifactId>hustle-lang</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
-            <artifactId>hustle-ism</artifactId>
+            <artifactId>hustle-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.leaderman.makemoney</groupId>
+            <artifactId>hustle-feishu</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -41,16 +41,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
     </dependencies>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>

@@ -61,18 +61,40 @@ async function main() {
   await waitForFeeds();
   console.log("信息流列表已就绪");
 
+  // 链接集合。
+  const hrefs = new Set();
+
   while (true) {
+    // 获取信息流列表。
     const feeds = getFeeds();
     for (const feed of feeds) {
+      // 获取信息流对象。
       const { href, html } = getFeed(feed);
-      console.log(href);
-      console.log(html);
+      if (hrefs.has(href)) {
+        // 链接已存在，跳过。
+        continue;
+      }
+      // 添加链接。
+      hrefs.add(href);
+
+      console.log("微博链接：", href);
+      console.log("微博源码：", html);
     }
 
-    window.mm.scrollDown(100);
+    console.log("微博数量：", hrefs.size);
+    if (hrefs.size >= 100) {
+      // 链接数量已达到阈值，退出。
+      break;
+    }
 
+    // 向下滚动。
+    window.mm.scrollDown(300);
+    // 休眠。
     await window.mm.sleep(1000);
   }
+
+  // 重新页面。
+  window.mm.reload();
 }
 
 (function () {
