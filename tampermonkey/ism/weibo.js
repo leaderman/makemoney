@@ -29,11 +29,23 @@ async function waitForFeeds() {
   }
 }
 
+/**
+ * 获取信息流元素。
+ * @param {Node} feed 信息流元素。
+ * @returns {Object} 信息流对象。
+ */
 function getFeed(feed) {
+  // 获取链接。
   const href = window.mm.attributeOf(
     window.mm.one(feed, 'a[class^="head-info_time"]'),
     "href"
   );
+
+  // 点击展开。
+  const exps = window.mm.all(feed, "span.expand");
+  for (const exp of exps) {
+    exp.click();
+  }
 
   return {
     href,
@@ -49,11 +61,17 @@ async function main() {
   await waitForFeeds();
   console.log("信息流列表已就绪");
 
-  const feeds = getFeeds();
-  for (const feed of feeds) {
-    const { href, html } = getFeed(feed);
-    console.log(href);
-    console.log(html);
+  while (true) {
+    const feeds = getFeeds();
+    for (const feed of feeds) {
+      const { href, html } = getFeed(feed);
+      console.log(href);
+      console.log(html);
+    }
+
+    window.mm.scrollDown(100);
+
+    await window.mm.sleep(1000);
   }
 }
 

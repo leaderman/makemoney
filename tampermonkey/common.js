@@ -263,3 +263,11 @@ window.mm.attributeOf = function (el, name) {
 window.mm.setTitle = function (title) {
   document.title = title;
 };
+
+/**
+ * 向下滚动。
+ * @param {number} pixels 像素。
+ */
+window.mm.scrollDown = function (pixels) {
+  window.scrollBy(0, pixels);
+};
