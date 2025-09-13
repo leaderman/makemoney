@@ -4,10 +4,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.PropertySource;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -55,24 +51,19 @@ public class Configurer implements WebMvcConfigurer {
   }
 
   @Bean
-  ApplicationRunner dumpProperties(Environment env) {
+  ApplicationRunner dumpRedisKeys(org.springframework.core.env.Environment env) {
     return args -> {
-      if (env instanceof ConfigurableEnvironment configurableEnv) {
-        System.out.println("=== All Spring Properties ===");
-        for (PropertySource<?> ps : configurableEnv.getPropertySources()) {
-          System.out.printf("-- PropertySource: %s --%n", ps.getName());
-          if (ps instanceof EnumerablePropertySource<?> enumerablePs) {
-            for (String key : enumerablePs.getPropertyNames()) {
-              try {
-                Object value = enumerablePs.getProperty(key);
-                System.out.printf("%s = %s%n", key, value);
-              } catch (Exception ignored) {
+      if (env instanceof org.springframework.core.env.ConfigurableEnvironment ce) {
+        System.out.println("=== All spring.redis.* from Environment ===");
+        ce.getPropertySources().forEach(ps -> {
+          if (ps instanceof org.springframework.core.env.EnumerablePropertySource<?> eps) {
+            for (String k : eps.getPropertyNames()) {
+              if (k.startsWith("spring.redis")) {
+                System.out.printf("[%s] %s=%s%n", ps.getName(), k, eps.getProperty(k));
               }
             }
           }
-        }
-      } else {
-        System.out.println("Environment is not ConfigurableEnvironment");
+        });
       }
     };
   }
