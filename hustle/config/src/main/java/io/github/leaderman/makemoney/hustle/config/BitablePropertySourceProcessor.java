@@ -35,7 +35,7 @@ public class BitablePropertySourceProcessor implements EnvironmentPostProcessor,
     this.load(environment);
 
     // 添加配置源
-    environment.getPropertySources().addLast(this.bitablePropertySource);
+    environment.getPropertySources().addFirst(this.bitablePropertySource);
   }
 
   /**
