@@ -4,6 +4,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -47,6 +51,29 @@ public class Configurer implements WebMvcConfigurer {
             name, f.getHostName(), f.getPort(), f.getDatabase(), "none"));
 
     return args -> {
+    };
+  }
+
+  @Bean
+  ApplicationRunner dumpProperties(Environment env) {
+    return args -> {
+      if (env instanceof ConfigurableEnvironment configurableEnv) {
+        System.out.println("=== All Spring Properties ===");
+        for (PropertySource<?> ps : configurableEnv.getPropertySources()) {
+          System.out.printf("-- PropertySource: %s --%n", ps.getName());
+          if (ps instanceof EnumerablePropertySource<?> enumerablePs) {
+            for (String key : enumerablePs.getPropertyNames()) {
+              try {
+                Object value = enumerablePs.getProperty(key);
+                System.out.printf("%s = %s%n", key, value);
+              } catch (Exception ignored) {
+              }
+            }
+          }
+        }
+      } else {
+        System.out.println("Environment is not ConfigurableEnvironment");
+      }
     };
   }
 
