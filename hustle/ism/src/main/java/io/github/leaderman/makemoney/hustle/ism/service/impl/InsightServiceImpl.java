@@ -13,6 +13,7 @@ import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
 import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
+import io.github.leaderman.makemoney.hustle.feishu.ImClient;
 import io.github.leaderman.makemoney.hustle.ism.domain.model.WeiboModel;
 import io.github.leaderman.makemoney.hustle.ism.service.InsightService;
 import jakarta.annotation.PostConstruct;
@@ -31,10 +32,13 @@ public class InsightServiceImpl implements InsightService {
 
   private int maxRetries;
   private int retryInterval;
+  private String bullishChat;
+  private String bearishChat;
   private String bitable;
   private String weiboTable;
 
   private final BitableClient bitableClient;
+  private final ImClient imClient;
 
   @PostConstruct
   public void init() {
@@ -43,6 +47,8 @@ public class InsightServiceImpl implements InsightService {
 
     this.maxRetries = this.configClient.getInt("ism.insight.max.retries");
     this.retryInterval = this.configClient.getInt("ism.insight.retry.interval");
+    this.bullishChat = this.configClient.getString("ism.insight.chat.bullish");
+    this.bearishChat = this.configClient.getString("ism.insight.chat.bearish");
     this.bitable = this.configClient.getString("ism.insight.bitable");
     this.weiboTable = this.configClient.getString("ism.insight.bitable.table.weibo");
   }
@@ -75,6 +81,28 @@ public class InsightServiceImpl implements InsightService {
       Map<String, String> output = bitableClient.getAiOutput(bitable, weiboTable, recordId, names, this.maxRetries,
           this.retryInterval);
       log.info("微博 {} 洞察完成，洞察结果：{}", href, output);
+
+      String correlation = output.get("相关性");
+      if (!correlation.equals("有")) {
+        return;
+      }
+
+      String sector = output.get("版块");
+      String analysis = output.get("解读");
+      String text = output.get("正文");
+      String nickname = output.get("博主");
+      String datetime = output.get("日期时间");
+
+      String title = String.format("【%s】%s", "微博", sector);
+      String content = String.format("解读：%s\\n正文：%s\\n链接：%s\\n博主：%s\\n日期时间：%s", analysis, text, href, nickname,
+          datetime);
+
+      String signal = output.get("信号");
+      if (signal.equals("好")) {
+        this.imClient.sendRedMessageByChatId(bullishChat, title, content);
+      } else {
+        this.imClient.sendGreenMessageByChatId(bearishChat, title, content);
+      }
     } catch (Exception e) {
       log.error("微博洞察错误：{}", ExceptionUtils.getStackTrace(e));
     }
