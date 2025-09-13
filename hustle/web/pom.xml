@@ -13,7 +13,7 @@
     <artifactId>hustle-web</artifactId>
 
     <dependencies>
-        <!-- <dependency>
+        <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
             <artifactId>hustle-config</artifactId>
             <version>${project.version}</version>
@@ -29,7 +29,7 @@
             <groupId>io.github.leaderman.makemoney</groupId>
             <artifactId>hustle-eastmoney</artifactId>
             <version>${project.version}</version>
-        </dependency> -->
+        </dependency>
 
         <dependency>
             <groupId>io.github.leaderman.makemoney</groupId>
