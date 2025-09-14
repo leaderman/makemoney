@@ -77,7 +77,7 @@ public class InsightServiceImpl implements InsightService {
       String recordId = record.getRecordId();
       log.info("微博 {} 已创建记录 {}", href, recordId);
 
-      List<String> names = List.of("链接", "昵称", "日期时间", "正文", "相关性", "信号", "版块", "解读");
+      List<String> names = List.of("链接", "昵称", "时间", "正文", "相关性", "信号", "版块", "解读");
 
       Map<String, String> output = bitableClient.getAiOutput(bitable, weiboTable, recordId, names, this.maxRetries,
           this.retryInterval);
@@ -94,9 +94,9 @@ public class InsightServiceImpl implements InsightService {
       String analysis = output.get("解读");
       String text = output.get("正文");
       String nickname = output.get("昵称");
-      String datetime = output.get("日期时间");
+      String time = output.get("时间");
       String content = String.format("微博链接：%s\\n\\n微博解读：%s\\n\\n微博正文：%s\\n\\n微博博主：%s\\n\\n日期时间：%s", href, analysis,
-          text, nickname, datetime);
+          text, nickname, time);
 
       String signal = output.get("信号");
       if (signal.equals("好")) {
