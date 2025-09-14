@@ -64,8 +64,9 @@ public class InsightServiceImpl implements InsightService {
   @Override
   @Async
   public void insight(WeiboModel model) {
+    String href = model.getHref();
+
     try {
-      String href = model.getHref();
       if (this.exists(href)) {
         log.info("微博 {} 已洞察，跳过", href);
         return;
@@ -104,7 +105,7 @@ public class InsightServiceImpl implements InsightService {
         this.imClient.sendGreenMessageByChatId(bearishChat, title, content);
       }
     } catch (Exception e) {
-      log.error("微博洞察错误：{}", ExceptionUtils.getStackTrace(e));
+      log.error("微博 {} 洞察错误：{}", href, ExceptionUtils.getStackTrace(e));
     }
   }
 }
