@@ -39,7 +39,7 @@ async function waitForFeeds() {
  * @param {Node} feed 信息流元素。
  * @returns {Object} 信息流对象。
  */
-function getFeed(feed) {
+async function getFeed(feed) {
   // 获取链接。
   const href = window.mm.attributeOf(
     window.mm.one(feed, 'a[class^="head-info_time"]'),
@@ -50,6 +50,8 @@ function getFeed(feed) {
   const exps = window.mm.all(feed, "span.expand");
   for (const exp of exps) {
     exp.click();
+
+    await window.mm.sleep(100);
   }
 
   return {
@@ -92,7 +94,7 @@ async function main() {
     const feeds = getFeeds();
     for (const feed of feeds) {
       // 获取信息流对象。
-      const { href, html } = getFeed(feed);
+      const { href, html } = await getFeed(feed);
       if (hrefs.has(href)) {
         // 链接已存在，跳过。
         continue;

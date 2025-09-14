@@ -94,8 +94,8 @@ public class InsightServiceImpl implements InsightService {
       String text = output.get("正文");
       String nickname = output.get("昵称");
       String datetime = output.get("日期时间");
-      String content = String.format("解读：%s\\n正文：%s\\n博主：%s\\n日期时间：%s\\n链接：%s", analysis, text, nickname, datetime,
-          href);
+      String content = String.format("微博链接：%s\\n\\n微博解读：%s\\n\\n微博正文：%s\\n\\n微博博主：%s\\n\\n日期时间：%s", href, analysis,
+          text, nickname, datetime);
 
       String signal = output.get("信号");
       if (signal.equals("好")) {
