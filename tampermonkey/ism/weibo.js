@@ -48,10 +48,12 @@ async function getFeed(feed) {
 
   // 点击展开。
   const exps = window.mm.all(feed, "span.expand");
-  for (const exp of exps) {
-    exp.click();
+  if (exps.length > 0) {
+    for (const exp of exps) {
+      exp.click();
+    }
 
-    await window.mm.sleep(100);
+    await window.mm.sleep(1000);
   }
 
   return {
