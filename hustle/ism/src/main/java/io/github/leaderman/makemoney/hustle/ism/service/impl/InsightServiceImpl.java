@@ -85,7 +85,8 @@ public class InsightServiceImpl implements InsightService {
       log.info("微博 {} 洞察完成，洞察结果：{}", href, output);
 
       String correlation = output.get("相关性");
-      if (!correlation.equals("有")) {
+      String signal = output.get("信号");
+      if (!(correlation.equals("有") || signal.equals("好"))) {
         return;
       }
 
@@ -99,7 +100,6 @@ public class InsightServiceImpl implements InsightService {
       String content = String.format("微博时间：%s\\n\\n微博解读：%s\\n\\n微博正文：%s\\n\\n微博博主：%s\\n\\n微博链接：%s\\n\\n洞察时间：%s", time,
           analysis, text, nickname, href, DatetimeUtil.getDatetime());
 
-      String signal = output.get("信号");
       if (signal.equals("好")) {
         this.imClient.sendRedMessageByChatId(bullishChat, title, content);
       } else {
