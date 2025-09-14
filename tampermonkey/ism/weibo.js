@@ -116,7 +116,7 @@ async function main() {
     }
 
     // 向下滚动。
-    window.mm.scrollDown(600);
+    window.mm.scrollDown(1000);
     // 休眠。
     await window.mm.sleep(1000);
   }
