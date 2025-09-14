@@ -16,6 +16,7 @@ import io.github.leaderman.makemoney.hustle.feishu.BitableClient;
 import io.github.leaderman.makemoney.hustle.feishu.ImClient;
 import io.github.leaderman.makemoney.hustle.ism.domain.model.WeiboModel;
 import io.github.leaderman.makemoney.hustle.ism.service.InsightService;
+import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,8 +96,8 @@ public class InsightServiceImpl implements InsightService {
       String text = output.get("正文");
       String nickname = output.get("昵称");
       String time = output.get("时间");
-      String content = String.format("微博链接：%s\\n\\n微博解读：%s\\n\\n微博正文：%s\\n\\n微博博主：%s\\n\\n日期时间：%s", href, analysis,
-          text, nickname, time);
+      String content = String.format("微博时间：%s\\n\\n微博解读：%s\\n\\n微博正文：%s\\n\\n微博博主：%s\\n\\n微博链接：%s\\n\\n洞察时间：%s", time,
+          analysis, text, nickname, href, DatetimeUtil.getDatetime());
 
       String signal = output.get("信号");
       if (signal.equals("好")) {
