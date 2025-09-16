@@ -1,5 +1,6 @@
 package io.github.leaderman.makemoney.hustle.config;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,6 +208,27 @@ public class ConfigClient {
    */
   public double getDouble(String name, double defaultValue) {
     return this.contains(name) ? this.getDouble(name) : defaultValue;
+  }
+
+  /**
+   * 获取配置项的值。
+   * 
+   * @param name 配置项名称
+   * @return 配置项的值
+   */
+  public BigDecimal getBigDecimal(String name) {
+    return new BigDecimal(this.getString(name));
+  }
+
+  /**
+   * 获取配置项的值，如果配置项不存在，则返回默认值。
+   * 
+   * @param name         配置项名称
+   * @param defaultValue 默认值
+   * @return 配置项的值
+   */
+  public BigDecimal getBigDecimal(String name, BigDecimal defaultValue) {
+    return this.contains(name) ? this.getBigDecimal(name) : defaultValue;
   }
 
   /**

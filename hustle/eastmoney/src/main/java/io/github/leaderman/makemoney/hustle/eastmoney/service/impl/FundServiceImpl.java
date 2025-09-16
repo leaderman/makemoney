@@ -41,6 +41,9 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
   private String priceHighChat;
   private String priceLowChat;
 
+  private BigDecimal highZone;
+  private BigDecimal lowZone;
+
   @PostConstruct
   public void init() {
     this.positionPriceHighChat = this.configClient.getString("feishu.chat.position.price.high");
@@ -48,6 +51,9 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
     this.priceHighChat = this.configClient.getString("feishu.chat.price.high");
     this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
+
+    this.highZone = this.configClient.getBigDecimal("eastmoney.price.high.zone");
+    this.lowZone = this.configClient.getBigDecimal("eastmoney.price.low.zone");
   }
 
   @Override
@@ -85,6 +91,22 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             }
           }
 
+          // 价格近高。
+          if (NumberUtil.greaterThanOrEqualTo(entity.getHighPrice().subtract(entity.getLatestPrice()), highZone)) {
+            String title = String.format("【价格近高】%s", entity.getName());
+            String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
+                entity.getLatestPrice(),
+                DatetimeUtil.getDatetime());
+
+            try {
+              this.imClient.sendRedMessageByChatId(
+                  securityService.hasPosition(entity.getCode()) ? positionPriceHighChat : priceHighChat, title,
+                  content);
+            } catch (Exception e) {
+              log.error("发送价格近高消息错误：{}", ExceptionUtils.getStackTrace(e));
+            }
+          }
+
           // 价格新低。
           if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
@@ -98,6 +120,20 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                   securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
+            }
+          }
+
+          // 价格近低。
+          if (NumberUtil.greaterThanOrEqualTo(entity.getLatestPrice().subtract(entity.getLowPrice()), lowZone)) {
+            String title = String.format("【价格近低】%s", entity.getName());
+            String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
+                DatetimeUtil.getDatetime());
+
+            try {
+              this.imClient.sendGreenMessageByChatId(
+                  securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
+            } catch (Exception e) {
+              log.error("发送价格近低消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
           }
 
