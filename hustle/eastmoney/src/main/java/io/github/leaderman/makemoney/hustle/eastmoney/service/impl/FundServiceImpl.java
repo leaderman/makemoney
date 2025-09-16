@@ -101,13 +101,14 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
                 entity.getLatestPrice(),
                 DatetimeUtil.getDatetime());
 
-            try {
-              this.imClient.sendRedMessageByChatId(
-                  securityService.hasPosition(entity.getCode()) ? positionPriceHighChat : priceHighChat, title,
-                  content);
-            } catch (Exception e) {
-              log.error("发送价格近高消息错误：{}", ExceptionUtils.getStackTrace(e));
-            }
+            // try {
+            // this.imClient.sendRedMessageByChatId(
+            // securityService.hasPosition(entity.getCode()) ? positionPriceHighChat :
+            // priceHighChat, title,
+            // content);
+            // } catch (Exception e) {
+            // log.error("发送价格近高消息错误：{}", ExceptionUtils.getStackTrace(e));
+            // }
           }
 
           // 价格新低。
@@ -135,12 +136,13 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
                 DatetimeUtil.getDatetime());
 
-            try {
-              this.imClient.sendGreenMessageByChatId(
-                  securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
-            } catch (Exception e) {
-              log.error("发送价格近低消息错误：{}", ExceptionUtils.getStackTrace(e));
-            }
+            // try {
+            // this.imClient.sendGreenMessageByChatId(
+            // securityService.hasPosition(entity.getCode()) ? positionPriceLowChat :
+            // priceLowChat, title, content);
+            // } catch (Exception e) {
+            // log.error("发送价格近低消息错误：{}", ExceptionUtils.getStackTrace(e));
+            // }
           }
 
           entity.setId(existingEntity.getId());
