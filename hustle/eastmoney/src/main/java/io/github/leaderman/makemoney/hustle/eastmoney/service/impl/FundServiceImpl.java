@@ -93,7 +93,7 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
           // 价格近高。
           if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getHighPrice().subtract(entity.getLatestPrice()),
+              && NumberUtil.greaterThan(existingEntity.getHighPrice().subtract(existingEntity.getLatestPrice()),
                   BigDecimal.ZERO)
               && NumberUtil.lessThanOrEqualTo(entity.getHighPrice().subtract(entity.getLatestPrice()), highZone)) {
             String title = String.format("【价格近高】%s", entity.getName());
@@ -128,7 +128,8 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
           // 价格近低。
           if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getLatestPrice().subtract(entity.getLowPrice()), BigDecimal.ZERO)
+              && NumberUtil.greaterThan(existingEntity.getLatestPrice().subtract(existingEntity.getLowPrice()),
+                  BigDecimal.ZERO)
               && NumberUtil.lessThanOrEqualTo(entity.getLatestPrice().subtract(entity.getLowPrice()), lowZone)) {
             String title = String.format("【价格近低】%s", entity.getName());
             String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
