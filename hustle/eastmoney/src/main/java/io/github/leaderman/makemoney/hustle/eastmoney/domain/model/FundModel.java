@@ -14,14 +14,23 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class FundModel extends BaseModel {
+  // 代码。
   private String code;
+  // 名称。
   private String name;
+  // 开盘价。
   private BigDecimal openPrice;
+  // 最新价。
   private BigDecimal latestPrice;
+  // 最高价。
   private BigDecimal highPrice;
+  // 最低价。
   private BigDecimal lowPrice;
+  // 涨跌幅。
   private BigDecimal changePercent;
+  // 涨跌额。
   private BigDecimal changeAmount;
+  // 昨收价。
   private BigDecimal prevClose;
 
   public static FundModel from(SyncFundRequest.Fund fund) {
@@ -35,6 +44,7 @@ public class FundModel extends BaseModel {
     model.setLowPrice(NumberUtil.toBigDecimal(fund.getLowPrice(), BigDecimal.ZERO));
 
     String changePercent = fund.getChangePercent();
+    // 如果涨跌幅以 % 结尾，则去掉 %。
     if (changePercent.endsWith("%")) {
       changePercent = changePercent.substring(0, changePercent.length() - 1);
     }

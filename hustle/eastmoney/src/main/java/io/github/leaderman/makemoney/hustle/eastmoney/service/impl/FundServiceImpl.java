@@ -35,14 +35,15 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
   private final SecurityService securityService;
 
+  // 价格新高（持仓）群组。
   private String positionPriceHighChat;
+  // 价格新低（持仓）群组。
   private String positionPriceLowChat;
 
+  // 价格新高（非持仓）群组。
   private String priceHighChat;
+  // 价格新低（非持仓）群组。
   private String priceLowChat;
-
-  private BigDecimal highZone;
-  private BigDecimal lowZone;
 
   @PostConstruct
   public void init() {
@@ -51,9 +52,6 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
     this.priceHighChat = this.configClient.getString("feishu.chat.price.high");
     this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
-
-    this.highZone = this.configClient.getBigDecimal("eastmoney.price.high.zone");
-    this.lowZone = this.configClient.getBigDecimal("eastmoney.price.low.zone");
   }
 
   @Override
@@ -62,28 +60,37 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
     // 获取代码列表。
     List<String> codes = models.stream().map(FundModel::getCode).collect(Collectors.toList());
 
-    // 获取代码对应的 ID。
-    Map<String, FundEntity> codeToEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list().stream()
-        .collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
+    // 从数据库中获取代码对应的基金。
+    // 注意：字典中只会包含数据库中存在的基金。
+    Map<String, FundEntity> codeToExistingFundEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list()
+        .stream().collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
 
-    // 转换为实体，且设置 ID。
+    // 基金模型列表转换为基金实体列表。
+    // 转换过程中，已存在于数据库中的基金会设置 ID。
     List<FundEntity> entities = models.stream().map(FundModel::to)
         .peek(entity -> {
-          FundEntity existingEntity = codeToEntities.get(entity.getCode());
+          FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
+          // 如果基金不存在于数据库中，则跳过。
           if (Objects.isNull(existingEntity)) {
             return;
           }
 
-          // 价格新高。
+          /*
+           * 价格新高：
+           * 基金的新最高价大于 0，
+           * 基金的旧最高价大于 0，
+           * 基金的新最高价大于基金的旧最高价。
+           */
           if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
-            String title = String.format("【价格新高】%s", entity.getName());
+            String title = String.format("价格新高 - %s", entity.getName());
             String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
                 entity.getLatestPrice(), DatetimeUtil.getDatetime());
 
             try {
               this.imClient.sendRedMessageByChatId(
+                  // 发送到持仓或非持仓群组。
                   securityService.hasPosition(entity.getCode()) ? positionPriceHighChat : priceHighChat, title,
                   content);
             } catch (Exception e) {
@@ -91,60 +98,29 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
             }
           }
 
-          // 价格近高。
-          if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getHighPrice().subtract(existingEntity.getLatestPrice()),
-                  BigDecimal.ZERO)
-              && NumberUtil.lessThanOrEqualTo(entity.getHighPrice().subtract(entity.getLatestPrice()), highZone)) {
-            String title = String.format("【价格近高】%s", entity.getName());
-            String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
-                entity.getLatestPrice(),
-                DatetimeUtil.getDatetime());
-
-            // try {
-            // this.imClient.sendRedMessageByChatId(
-            // securityService.hasPosition(entity.getCode()) ? positionPriceHighChat :
-            // priceHighChat, title,
-            // content);
-            // } catch (Exception e) {
-            // log.error("发送价格近高消息错误：{}", ExceptionUtils.getStackTrace(e));
-            // }
-          }
-
-          // 价格新低。
+          /*
+           * 价格新低：
+           * 基金的新最低价大于 0，
+           * 基金的旧最低价大于 0，
+           * 基金的新最低价小于基金的旧最低价。
+           */
           if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
-            String title = String.format("【价格新低】%s", entity.getName());
+            String title = String.format("价格新低 - %s", entity.getName());
             String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
                 DatetimeUtil.getDatetime());
 
             try {
               this.imClient.sendGreenMessageByChatId(
+                  // 发送到持仓或非持仓群组。
                   securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
           }
 
-          // 价格近低。
-          if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getLatestPrice().subtract(existingEntity.getLowPrice()),
-                  BigDecimal.ZERO)
-              && NumberUtil.lessThanOrEqualTo(entity.getLatestPrice().subtract(entity.getLowPrice()), lowZone)) {
-            String title = String.format("【价格近低】%s", entity.getName());
-            String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
-                DatetimeUtil.getDatetime());
-
-            // try {
-            // this.imClient.sendGreenMessageByChatId(
-            // securityService.hasPosition(entity.getCode()) ? positionPriceLowChat :
-            // priceLowChat, title, content);
-            // } catch (Exception e) {
-            // log.error("发送价格近低消息错误：{}", ExceptionUtils.getStackTrace(e));
-            // }
-          }
-
+          // 设置 ID。
           entity.setId(existingEntity.getId());
         })
         .collect(Collectors.toList());
