@@ -39,19 +39,29 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
 
   private final SecurityService securityService;
 
+  // 多维表格。
   private String bitable;
+  // 资金持仓数据表。
   private String positionTable;
 
+  // 持仓盈利（总体）群组。
   private String positionProfitTotalChat;
+  // 持仓亏损（总体）群组。
   private String positionLossTotalChat;
 
+  // 持仓盈利新高（总体）群组。
   private String positionProfitHighTotalChat;
+  // 持仓亏损新低（总体）群组。
   private String positionLossLowTotalChat;
 
+  // 当日盈利（总体）群组。
   private String dailyProfitTotalChat;
+  // 当日亏损（总体）群组。
   private String dailyLossTotalChat;
 
+  // 当日盈利新高（总体）群组。
   private String dailyProfitHighTotalChat;
+  // 当日亏损新低（总体）群组。
   private String dailyLossLowTotalChat;
 
   @PostConstruct
@@ -77,10 +87,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     if (Objects.isNull(entity)) {
       entity = PositionModel.toEntity(model);
     } else {
-      // 持仓盈利。
+      /*
+       * 持仓盈利（总体）：
+       * 持仓盈亏旧值小于或等于 0，
+       * 持仓盈亏新值大于 0。
+       */
       if (NumberUtil.lessThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
-        String title = String.format("【持仓盈利】");
+        String title = String.format("持仓盈利");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -90,10 +104,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 持仓亏损。
+      /*
+       * 持仓亏损（总体）：
+       * 持仓盈亏旧值大于或等于 0，
+       * 持仓盈亏新值小于 0。
+       */
       if (NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
-        String title = String.format("【持仓亏损】");
+        String title = String.format("持仓亏损");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -103,10 +121,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 持仓盈利新高。
+      /*
+       * 持仓盈利新高（总体）：
+       * 持仓盈亏新值大于 0，
+       * 持仓盈亏旧值大于 0，
+       * 持仓盈亏新值大于持仓盈亏旧值。
+       */
       if (NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
-        String title = String.format("【持仓盈利新高】");
+        String title = String.format("持仓盈利新高");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -116,10 +140,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 持仓亏损新低。
+      /*
+       * 持仓亏损新低（总体）：
+       * 持仓盈亏新值小于 0，
+       * 持仓盈亏旧值小于 0，
+       * 持仓盈亏新值小于持仓盈亏旧值。
+       */
       if (NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(entity.getPositionProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
-        String title = String.format("【持仓亏损新低】");
+        String title = String.format("持仓亏损新低");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -129,10 +159,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日盈利。
+      /*
+       * 当日盈利（总体）：
+       * 当日盈亏旧值小于或等于 0，
+       * 当日盈亏新值大于 0。
+       */
       if (NumberUtil.lessThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
-        String title = String.format("【当日盈利】");
+        String title = String.format("当日盈利");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -142,10 +176,14 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日亏损。
+      /*
+       * 当日亏损（总体）：
+       * 当日盈亏旧值大于或等于 0，
+       * 当日盈亏新值小于 0。
+       */
       if (NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
-        String title = String.format("【当日亏损】");
+        String title = String.format("当日亏损");
         String content = String.format("亏损金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -155,10 +193,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日盈利新高。
+      /*
+       * 当日盈利新高（总体）：
+       * 当日盈亏新值大于 0，
+       * 当日盈亏旧值大于 0，
+       * 当日盈亏新值大于当日盈亏旧值。
+       */
       if (NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
-        String title = String.format("【当日盈利新高】");
+        String title = String.format("当日盈利新高");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -168,10 +212,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         }
       }
 
-      // 当日亏损新低。
+      /*
+       * 当日亏损新低（总体）：
+       * 当日盈亏新值小于 0，
+       * 当日盈亏旧值小于 0，
+       * 当日盈亏新值小于当日盈亏旧值。
+       */
       if (NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(entity.getDailyProfitLoss(), BigDecimal.ZERO)
           && NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
-        String title = String.format("【当日盈利新低】");
+        String title = String.format("当日盈利新低");
         String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
         try {
@@ -186,12 +236,12 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       entity.setAvailableFunds(model.getAvailableFunds());
 
       entity.setPositionProfitLoss(model.getPositionProfitLoss());
-      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
-          || NumberUtil.equals(entity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
+      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
+        // 更新持仓盈亏最大值。
         entity.setPositionProfitLossMax(model.getPositionProfitLoss());
       }
-      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
-          || NumberUtil.equals(entity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
+      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
+        // 更新持仓盈亏最小值。
         entity.setPositionProfitLossMin(model.getPositionProfitLoss());
       }
 
@@ -199,12 +249,12 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       entity.setWithdrawableFunds(model.getWithdrawableFunds());
 
       entity.setDailyProfitLoss(model.getDailyProfitLoss());
-      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
-          || NumberUtil.equals(entity.getDailyProfitLossMax(), BigDecimal.ZERO)) {
+      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
+        // 更新当日盈亏最大值。
         entity.setDailyProfitLossMax(model.getDailyProfitLoss());
       }
-      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
-          || NumberUtil.equals(entity.getDailyProfitLossMin(), BigDecimal.ZERO)) {
+      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
+        // 更新当日盈亏最小值。
         entity.setDailyProfitLossMin(model.getDailyProfitLoss());
       }
 
