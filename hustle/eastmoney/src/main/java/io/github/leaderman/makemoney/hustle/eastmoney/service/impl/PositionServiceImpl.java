@@ -244,7 +244,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
        * 或持仓盈亏更新时间不是当天。
        */
       if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
-          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
+          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
         entity.setPositionProfitLossMax(model.getPositionProfitLoss());
       }
 
@@ -254,7 +254,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
        * 或持仓盈亏更新时间不是当天。
        */
       if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
-          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
+          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
         // 更新持仓盈亏最小值。
         entity.setPositionProfitLossMin(model.getPositionProfitLoss());
       }
@@ -270,7 +270,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
        * 或当日盈亏更新时间不是当天。
        */
       if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
-          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
+          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
         entity.setDailyProfitLossMax(model.getDailyProfitLoss());
       }
 
@@ -280,7 +280,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
        * 或当日盈亏更新时间不是当天。
        */
       if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
-          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
+          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
         entity.setDailyProfitLossMin(model.getDailyProfitLoss());
       }
 
