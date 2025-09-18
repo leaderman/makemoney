@@ -1,6 +1,7 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -236,11 +237,24 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       entity.setAvailableFunds(model.getAvailableFunds());
 
       entity.setPositionProfitLoss(model.getPositionProfitLoss());
-      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())) {
-        // 更新持仓盈亏最大值。
+
+      /*
+       * 更新持仓盈亏最大值：
+       * 持仓盈亏新值大于持仓盈亏旧值，
+       * 或持仓盈亏更新时间不是当天。
+       */
+      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
+          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
         entity.setPositionProfitLossMax(model.getPositionProfitLoss());
       }
-      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())) {
+
+      /*
+       * 更新持仓盈亏最小值：
+       * 持仓盈亏新值小于持仓盈亏旧值，
+       * 或持仓盈亏更新时间不是当天。
+       */
+      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
+          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
         // 更新持仓盈亏最小值。
         entity.setPositionProfitLossMin(model.getPositionProfitLoss());
       }
@@ -249,12 +263,24 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       entity.setWithdrawableFunds(model.getWithdrawableFunds());
 
       entity.setDailyProfitLoss(model.getDailyProfitLoss());
-      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())) {
-        // 更新当日盈亏最大值。
+
+      /*
+       * 更新当日盈亏最大值：
+       * 当日盈亏新值大于当日盈亏旧值，
+       * 或当日盈亏更新时间不是当天。
+       */
+      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
+          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
         entity.setDailyProfitLossMax(model.getDailyProfitLoss());
       }
-      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())) {
-        // 更新当日盈亏最小值。
+
+      /*
+       * 更新当日盈亏最小值：
+       * 当日盈亏新值小于当日盈亏旧值，
+       * 或当日盈亏更新时间不是当天。
+       */
+      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
+          || !DatetimeUtil.isSameDay(model.getUpdatedAt(), LocalDateTime.now())) {
         entity.setDailyProfitLossMin(model.getDailyProfitLoss());
       }
 

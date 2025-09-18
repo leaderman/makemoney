@@ -66,4 +66,15 @@ public class DatetimeUtil {
   public static String getDatetime() {
     return LocalDateTime.now().format(DATETIME_FORMATTER);
   }
+
+  /**
+   * 判断两个日期时间是否是同一天。
+   * 
+   * @param left  左边的日期时间。
+   * @param right 右边的日期时间。
+   * @return 如果两个日期时间是同一天，则返回 true，否则返回 false。
+   */
+  public static boolean isSameDay(LocalDateTime left, LocalDateTime right) {
+    return left.toLocalDate().equals(right.toLocalDate());
+  }
 }
