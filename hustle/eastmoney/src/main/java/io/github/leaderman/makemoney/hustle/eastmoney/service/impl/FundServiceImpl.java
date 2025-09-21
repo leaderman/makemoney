@@ -35,21 +35,13 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
 
   private final SecurityService securityService;
 
-  // 价格新高（持仓）群组。
-  private String positionPriceHighChat;
-  // 价格新低（持仓）群组。
-  private String positionPriceLowChat;
-
-  // 价格新高（非持仓）群组。
+  // 价格新高群组。
   private String priceHighChat;
-  // 价格新低（非持仓）群组。
+  // 价格新低群组。
   private String priceLowChat;
 
   @PostConstruct
   public void init() {
-    this.positionPriceHighChat = this.configClient.getString("feishu.chat.position.price.high");
-    this.positionPriceLowChat = this.configClient.getString("feishu.chat.position.price.low");
-
     this.priceHighChat = this.configClient.getString("feishu.chat.price.high");
     this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
   }
@@ -85,14 +77,14 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
               && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
             String title = String.format("价格新高 - %s", entity.getName());
+            if (securityService.hasPosition(entity.getCode())) {
+              title += "（持仓）";
+            }
             String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
                 entity.getLatestPrice(), DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendRedMessageByChatId(
-                  // 发送到持仓或非持仓群组。
-                  securityService.hasPosition(entity.getCode()) ? positionPriceHighChat : priceHighChat, title,
-                  content);
+              this.imClient.sendRedMessageByChatId(priceHighChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新高消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
@@ -108,13 +100,14 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
               && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
             String title = String.format("价格新低 - %s", entity.getName());
+            if (securityService.hasPosition(entity.getCode())) {
+              title += "（持仓）";
+            }
             String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
                 DatetimeUtil.getDatetime());
 
             try {
-              this.imClient.sendGreenMessageByChatId(
-                  // 发送到持仓或非持仓群组。
-                  securityService.hasPosition(entity.getCode()) ? positionPriceLowChat : priceLowChat, title, content);
+              this.imClient.sendGreenMessageByChatId(priceLowChat, title, content);
             } catch (Exception e) {
               log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
             }
