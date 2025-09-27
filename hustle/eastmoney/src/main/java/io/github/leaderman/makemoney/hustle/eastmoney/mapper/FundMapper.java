@@ -7,5 +7,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundEntity;
 
 @Mapper
-public interface FuncMapper extends BaseMapper<FundEntity> {
+public interface FundMapper extends BaseMapper<FundEntity> {
 }

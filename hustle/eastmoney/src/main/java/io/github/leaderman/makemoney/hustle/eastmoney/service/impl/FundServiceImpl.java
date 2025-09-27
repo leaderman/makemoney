@@ -17,7 +17,7 @@ import io.github.leaderman.makemoney.hustle.config.ConfigClient;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.SecurityModel;
-import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FuncMapper;
+import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FundMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.FundService;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.SecurityService;
 import io.github.leaderman.makemoney.hustle.feishu.ImClient;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> implements FundService {
+public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> implements FundService {
   private final ConfigClient configClient;
   private final ImClient imClient;
 
