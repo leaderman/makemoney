@@ -16,6 +16,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundModel;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.SecurityModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FuncMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.FundService;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.SecurityService;
@@ -77,11 +78,17 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
               && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
               && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
             String title = String.format("价格新高 - %s", entity.getName());
+            String content = String.format("最高价格：%s\\n", entity.getHighPrice());
+
             if (securityService.hasPosition(entity.getCode())) {
               title += "（持仓）";
+
+              SecurityModel securityModel = securityService.get(entity.getCode());
+              content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+                  securityModel.getPositionProfitLoss(), securityModel.getPositionProfitLossRatio());
             }
-            String content = String.format("最高价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getHighPrice(),
-                entity.getLatestPrice(), DatetimeUtil.getDatetime());
+
+            content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
 
             try {
               this.imClient.sendRedMessageByChatId(priceHighChat, title, content);
@@ -100,11 +107,18 @@ public class FundServiceImpl extends ServiceImpl<FuncMapper, FundEntity> impleme
               && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
               && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
             String title = String.format("价格新低 - %s", entity.getName());
+            String content = String.format("最低价格：%s\\n", entity.getLowPrice());
+
             if (securityService.hasPosition(entity.getCode())) {
               title += "（持仓）";
+
+              SecurityModel securityModel = securityService.get(entity.getCode());
+              content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+                  securityModel.getPositionProfitLoss(),
+                  securityModel.getPositionProfitLossRatio());
             }
-            String content = String.format("最低价格：%s\\n最新价格：%s\\n日期时间：%s", entity.getLowPrice(), entity.getLatestPrice(),
-                DatetimeUtil.getDatetime());
+
+            content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
 
             try {
               this.imClient.sendGreenMessageByChatId(priceLowChat, title, content);

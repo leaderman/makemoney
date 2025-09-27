@@ -355,4 +355,11 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   public boolean hasPosition(String securityCode) {
     return this.lambdaQuery().eq(SecurityEntity::getSecurityCode, securityCode).exists();
   }
+
+  @Override
+  public SecurityModel get(String securityCode) {
+    return this.lambdaQuery().eq(SecurityEntity::getSecurityCode, securityCode).oneOpt()
+        .map(SecurityModel::from)
+        .orElse(null);
+  }
 }

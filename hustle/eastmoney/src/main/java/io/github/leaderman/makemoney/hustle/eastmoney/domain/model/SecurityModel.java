@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import io.github.leaderman.makemoney.hustle.domain.model.BaseModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.SecurityEntity;
-import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncPositionRequest.Security;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.request.SyncPositionRequest;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,23 +15,38 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class SecurityModel extends BaseModel {
+  // 证券代码。
   private String securityCode;
+  // 证券名称。
   private String securityName;
+  // 持仓数量。
   private Integer holdingQuantity;
+  // 可用数量。
   private Integer availableQuantity;
+  // 成本价。
   private BigDecimal costPrice;
+  // 当前价。
   private BigDecimal currentPrice;
+  // 最新市值。
   private BigDecimal marketValue;
+  // 持仓盈亏。
   private BigDecimal positionProfitLoss;
+  // 持仓盈亏比例。
   private BigDecimal positionProfitLossRatio;
+  // 持仓盈亏最大值。
   private BigDecimal positionProfitLossMax;
+  // 持仓盈亏最小值。
   private BigDecimal positionProfitLossMin;
+  // 当日盈亏。
   private BigDecimal dailyProfitLoss;
+  // 当日盈亏比例。
   private BigDecimal dailyProfitLossRatio;
+  // 当日盈亏最大值。
   private BigDecimal dailyProfitLossMax;
+  // 当日盈亏最小值。
   private BigDecimal dailyProfitLossMin;
 
-  public static SecurityModel from(Security security) {
+  public static SecurityModel from(SyncPositionRequest.Security security) {
     SecurityModel model = new SecurityModel();
 
     model.setSecurityCode(Objects.nonNull(security.getSecurityCode()) ? security.getSecurityCode() : "");
@@ -86,5 +101,27 @@ public class SecurityModel extends BaseModel {
     entity.setDailyProfitLossMin(model.getDailyProfitLossMin());
 
     return entity;
+  }
+
+  public static SecurityModel from(SecurityEntity entity) {
+    SecurityModel model = new SecurityModel();
+
+    model.setSecurityCode(entity.getSecurityCode());
+    model.setSecurityName(entity.getSecurityName());
+    model.setHoldingQuantity(entity.getHoldingQuantity());
+    model.setAvailableQuantity(entity.getAvailableQuantity());
+    model.setCostPrice(entity.getCostPrice());
+    model.setCurrentPrice(entity.getCurrentPrice());
+    model.setMarketValue(entity.getMarketValue());
+    model.setPositionProfitLoss(entity.getPositionProfitLoss());
+    model.setPositionProfitLossRatio(entity.getPositionProfitLossRatio());
+    model.setPositionProfitLossMax(entity.getPositionProfitLossMax());
+    model.setPositionProfitLossMin(entity.getPositionProfitLossMin());
+    model.setDailyProfitLoss(entity.getDailyProfitLoss());
+    model.setDailyProfitLossRatio(entity.getDailyProfitLossRatio());
+    model.setDailyProfitLossMax(entity.getDailyProfitLossMax());
+    model.setDailyProfitLossMin(entity.getDailyProfitLossMin());
+
+    return model;
   }
 }
