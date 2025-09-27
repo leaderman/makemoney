@@ -134,5 +134,6 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
 
     // 保存或更新。
     this.saveOrUpdateBatch(entities);
+    log.info("保存或更新 {} 条实体", entities.size());
   }
 }
