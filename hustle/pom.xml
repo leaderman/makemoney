@@ -21,6 +21,7 @@
         <module>web</module>
         <module>eastmoney</module>
         <module>ism</module>
+        <module>trade</module>
     </modules>
 
     <parent>
