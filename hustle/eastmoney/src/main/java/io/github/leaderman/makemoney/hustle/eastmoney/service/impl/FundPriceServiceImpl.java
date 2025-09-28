@@ -11,13 +11,22 @@ import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundPriceEnt
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundPriceModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.mapper.FundPriceMapper;
 import io.github.leaderman.makemoney.hustle.eastmoney.service.FundPriceService;
+import io.github.leaderman.makemoney.hustle.trade.service.TradeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class FundPriceServiceImpl extends ServiceImpl<FundPriceMapper, FundPriceEntity> implements FundPriceService {
+  private final TradeService tradeService;
+
   @Override
   public void save(List<FundPriceModel> models) {
+    if (!this.tradeService.isTradingTime()) {
+      return;
+    }
+
     this.saveBatch(models.stream().map(FundPriceModel::to).collect(Collectors.toList()));
     log.info("保存 {} 条实体", models.size());
   }

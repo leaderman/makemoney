@@ -1,5 +1,7 @@
 package io.github.leaderman.makemoney.hustle.lang;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.Test;
 
 public class DatetimeUtilTest {
@@ -22,5 +24,15 @@ public class DatetimeUtilTest {
   @Test
   public void testGetDatetime() {
     System.out.println(DatetimeUtil.getDatetime());
+  }
+
+  @Test
+  public void testFormatDate() {
+    System.out.println(DatetimeUtil.formatDate(LocalDateTime.now()));
+  }
+
+  @Test
+  public void testFormatDatetime() {
+    System.out.println(DatetimeUtil.formatDatetime(LocalDateTime.now()));
   }
 }

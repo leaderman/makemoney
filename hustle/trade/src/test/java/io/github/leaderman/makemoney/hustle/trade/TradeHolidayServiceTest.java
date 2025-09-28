@@ -1,5 +1,7 @@
 package io.github.leaderman.makemoney.hustle.trade;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,5 +16,7 @@ public class TradeHolidayServiceTest {
   @Test
   public void testIsHoliday() {
     System.out.println(tradeHolidayService.isHoliday());
+    System.out.println(tradeHolidayService.isHoliday("2025-09-28"));
+    System.out.println(tradeHolidayService.isHoliday(LocalDateTime.now()));
   }
 }

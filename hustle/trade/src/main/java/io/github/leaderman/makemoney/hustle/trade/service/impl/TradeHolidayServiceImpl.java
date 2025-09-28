@@ -1,5 +1,7 @@
 package io.github.leaderman.makemoney.hustle.trade.service.impl;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -23,5 +25,15 @@ public class TradeHolidayServiceImpl extends ServiceImpl<TradeHolidayMapper, Tra
   @Override
   public boolean isHoliday() {
     return this.isHoliday(TradeHolidayModel.MARKET_CN, DatetimeUtil.getDate());
+  }
+
+  @Override
+  public boolean isHoliday(String date) {
+    return this.isHoliday(TradeHolidayModel.MARKET_CN, date);
+  }
+
+  @Override
+  public boolean isHoliday(LocalDateTime datetime) {
+    return this.isHoliday(TradeHolidayModel.MARKET_CN, DatetimeUtil.formatDate(datetime));
   }
 }

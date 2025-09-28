@@ -77,4 +77,24 @@ public class DatetimeUtil {
   public static boolean isSameDay(LocalDateTime left, LocalDateTime right) {
     return left.toLocalDate().equals(right.toLocalDate());
   }
+
+  /**
+   * 格式化日期。
+   * 
+   * @param datetime 日期时间。
+   * @return 日期。
+   */
+  public static String formatDate(LocalDateTime datetime) {
+    return datetime.format(DATE_FORMATTER);
+  }
+
+  /**
+   * 格式化日期时间。
+   * 
+   * @param datetime 日期时间。
+   * @return 日期时间。
+   */
+  public static String formatDatetime(LocalDateTime datetime) {
+    return datetime.format(DATETIME_FORMATTER);
+  }
 }
