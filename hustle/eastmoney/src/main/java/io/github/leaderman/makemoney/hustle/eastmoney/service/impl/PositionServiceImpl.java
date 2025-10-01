@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,8 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   private String dailyProfitHighTotalChat;
   // 当日亏损新低（总体）群组。
   private String dailyLossLowTotalChat;
+
+  private final Map<String, AppTableRecord> positionRecords = new ConcurrentHashMap<>();
 
   @PostConstruct
   public void init() {
@@ -247,9 +250,15 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   }
 
   private void syncBitable(PositionModel model) throws Exception {
-    Map<String, AppTableRecord> positionRecords = this.bitableClient.listTableRecords(this.bitable, this.positionTable)
-        .stream()
-        .collect(Collectors.toMap(record -> (String) record.getFields().get("资金名称"), Function.identity()));
+    if (positionRecords.isEmpty()) {
+      synchronized (this.positionRecords) {
+        if (this.positionRecords.isEmpty()) {
+          this.positionRecords.putAll(this.bitableClient.listTableRecords(this.bitable, this.positionTable)
+              .stream()
+              .collect(Collectors.toMap(record -> (String) record.getFields().get("字段名称"), Function.identity())));
+        }
+      }
+    }
 
     List<String> recordIds = new ArrayList<>(positionRecords.size());
     List<Map<String, Object>> records = new ArrayList<>(positionRecords.size());
