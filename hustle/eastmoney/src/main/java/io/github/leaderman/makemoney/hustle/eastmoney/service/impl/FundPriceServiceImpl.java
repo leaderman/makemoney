@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -22,6 +23,7 @@ public class FundPriceServiceImpl extends ServiceImpl<FundPriceMapper, FundPrice
   private final TradeService tradeService;
 
   @Override
+  @Transactional
   public void save(List<FundPriceModel> models) {
     if (!this.tradeService.isTradingTime()) {
       return;
