@@ -232,6 +232,26 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     }
   }
 
+  private SecurityModel toSecurityModel(AppTableRecord record) {
+    SecurityModel security = new SecurityModel();
+
+    security.setSecurityCode((String) record.getFields().get("证券代码"));
+    security.setSecurityName((String) record.getFields().get("证券名称"));
+    security.setHoldingQuantity(NumberUtil.toInteger((String) record.getFields().get("持仓数量"), 0));
+    security.setAvailableQuantity(NumberUtil.toInteger((String) record.getFields().get("可用数量"), 0));
+    security.setCostPrice(NumberUtil.toBigDecimal((String) record.getFields().get("成本价"), BigDecimal.ZERO));
+    security.setCurrentPrice(NumberUtil.toBigDecimal((String) record.getFields().get("当前价"), BigDecimal.ZERO));
+    security.setMarketValue(NumberUtil.toBigDecimal((String) record.getFields().get("最新市值"), BigDecimal.ZERO));
+    security.setPositionProfitLoss(NumberUtil.toBigDecimal((String) record.getFields().get("持仓盈亏"), BigDecimal.ZERO));
+    security.setPositionProfitLossRatio(
+        NumberUtil.toBigDecimal((String) record.getFields().get("持仓盈亏比例"), BigDecimal.ZERO));
+    security.setDailyProfitLoss(NumberUtil.toBigDecimal((String) record.getFields().get("当日盈亏"), BigDecimal.ZERO));
+    security
+        .setDailyProfitLossRatio(NumberUtil.toBigDecimal((String) record.getFields().get("当日盈亏比例"), BigDecimal.ZERO));
+
+    return security;
+  }
+
   private Map<String, Object> toBitableRecord(SecurityModel security) {
     Map<String, Object> record = new HashMap<>();
 
@@ -251,7 +271,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   }
 
   private void syncBitable(List<SecurityModel> securities) throws Exception {
-    // 创建记录列表。
+    // 新增记录列表。
     List<Map<String, Object>> createRecords = new ArrayList<>();
 
     // 更新记录列表。
@@ -275,9 +295,15 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       SecurityModel security = entry.getValue();
 
       if (!rightRecords.containsKey(securityCode)) {
-        // 创建记录。
+        // 证券不存在于多维表格中，需要新增。
         createRecords.add(toBitableRecord(security));
       } else {
+        AppTableRecord existingRecord = rightRecords.get(securityCode);
+        if (SecurityModel.equals(security, toSecurityModel(existingRecord))) {
+          // 证券已存在于多维表格中，且数据相同，跳过。
+          continue;
+        }
+
         // 更新记录。
         updateRecordIds.add(rightRecords.get(securityCode).getRecordId());
         updateRecords.add(toBitableRecord(security));
@@ -293,20 +319,17 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     }
 
     if (CollectionUtils.isNotEmpty(createRecords)) {
-      // 创建。
-      log.info("创建 {} 条记录", createRecords.size());
+      // 新增。
       this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, createRecords);
     }
 
     if (CollectionUtils.isNotEmpty(updateRecords)) {
       // 更新。
-      log.info("更新 {} 条记录", updateRecords.size());
       this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, updateRecordIds, updateRecords);
     }
 
     if (CollectionUtils.isNotEmpty(deleteRecordIds)) {
       // 删除。
-      log.info("删除 {} 条记录", deleteRecordIds.size());
       this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, deleteRecordIds);
     }
   }

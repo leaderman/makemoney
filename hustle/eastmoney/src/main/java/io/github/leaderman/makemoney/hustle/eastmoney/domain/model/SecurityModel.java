@@ -124,4 +124,18 @@ public class SecurityModel extends BaseModel {
 
     return model;
   }
+
+  public static boolean equals(SecurityModel left, SecurityModel right) {
+    return left.getSecurityCode().equals(right.getSecurityCode())
+        && left.getSecurityName().equals(right.getSecurityName())
+        && left.getHoldingQuantity().equals(right.getHoldingQuantity())
+        && left.getAvailableQuantity().equals(right.getAvailableQuantity())
+        && NumberUtil.equals(left.getCostPrice(), right.getCostPrice())
+        && NumberUtil.equals(left.getCurrentPrice(), right.getCurrentPrice())
+        && NumberUtil.equals(left.getMarketValue(), right.getMarketValue())
+        && NumberUtil.equals(left.getPositionProfitLoss(), right.getPositionProfitLoss())
+        && NumberUtil.equals(left.getPositionProfitLossRatio(), right.getPositionProfitLossRatio())
+        && NumberUtil.equals(left.getDailyProfitLoss(), right.getDailyProfitLoss())
+        && NumberUtil.equals(left.getDailyProfitLossRatio(), right.getDailyProfitLossRatio());
+  }
 }
