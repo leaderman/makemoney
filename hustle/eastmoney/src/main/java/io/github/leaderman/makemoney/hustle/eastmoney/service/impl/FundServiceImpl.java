@@ -48,18 +48,75 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
     this.priceLowChat = this.configClient.getString("feishu.chat.price.low");
   }
 
+  private void newHighPrice(FundEntity entity, FundEntity existingEntity) {
+    /*
+     * 价格新高：
+     * 基金的新最高价大于 0，
+     * 基金的旧最高价大于 0，
+     * 基金的新最高价大于基金的旧最高价。
+     */
+    if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
+        && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
+        && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
+      String title = String.format("价格新高 - %s", entity.getName());
+      String content = String.format("最高价格：%s\\n", entity.getHighPrice());
+
+      if (securityService.hasPosition(entity.getCode())) {
+        title += "（持仓）";
+
+        SecurityModel securityModel = securityService.get(entity.getCode());
+        content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+            securityModel.getPositionProfitLoss(), securityModel.getPositionProfitLossRatio());
+      }
+
+      content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
+
+      // 异步发送消息。
+      this.imClient.sendRedMessageByChatIdAsync(priceHighChat, title, content);
+    }
+  }
+
+  private void newLowPrice(FundEntity entity, FundEntity existingEntity) {
+    /*
+     * 价格新低：
+     * 基金的新最低价大于 0，
+     * 基金的旧最低价大于 0，
+     * 基金的新最低价小于基金的旧最低价。
+     */
+    if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
+        && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
+        && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
+      String title = String.format("价格新低 - %s", entity.getName());
+      String content = String.format("最低价格：%s\\n", entity.getLowPrice());
+
+      if (securityService.hasPosition(entity.getCode())) {
+        title += "（持仓）";
+
+        SecurityModel securityModel = securityService.get(entity.getCode());
+        content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+            securityModel.getPositionProfitLoss(),
+            securityModel.getPositionProfitLossRatio());
+      }
+
+      content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
+
+      // 异步发送消息。
+      this.imClient.sendGreenMessageByChatIdAsync(priceLowChat, title, content);
+    }
+  }
+
   @Override
   @Transactional
   public void sync(List<FundModel> models) {
-    // 获取代码列表。
+    // 代码列表。
     List<String> codes = models.stream().map(FundModel::getCode).collect(Collectors.toList());
 
     // 从数据库中获取代码对应的基金。
-    // 注意：字典中只会包含数据库中存在的基金。
+    // 注意：如果代码对应的基金不存在于数据库中，则不会出现在结果中。
     Map<String, FundEntity> codeToExistingFundEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list()
         .stream().collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
 
-    // 需要增加或更新的基金列表。
+    // 需要新增或更新的基金列表。
     List<FundEntity> entities = new ArrayList<>();
 
     for (FundModel model : models) {
@@ -67,7 +124,7 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
 
       FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
       if (Objects.isNull(existingEntity)) {
-        // 基金不存在于数据库中，需要增加。
+        // 基金不存在于数据库中，需要新增。
         entities.add(entity);
 
         continue;
@@ -83,64 +140,16 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
       entity.setId(existingEntity.getId());
       entities.add(entity);
 
-      /*
-       * 价格新高：
-       * 基金的新最高价大于 0，
-       * 基金的旧最高价大于 0，
-       * 基金的新最高价大于基金的旧最高价。
-       */
-      if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
-          && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
-          && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
-        String title = String.format("价格新高 - %s", entity.getName());
-        String content = String.format("最高价格：%s\\n", entity.getHighPrice());
-
-        if (securityService.hasPosition(entity.getCode())) {
-          title += "（持仓）";
-
-          SecurityModel securityModel = securityService.get(entity.getCode());
-          content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
-              securityModel.getPositionProfitLoss(), securityModel.getPositionProfitLossRatio());
-        }
-
-        content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
-
-        // 异步发送消息。
-        this.imClient.sendRedMessageByChatIdAsync(priceHighChat, title, content);
-      }
-
-      /*
-       * 价格新低：
-       * 基金的新最低价大于 0，
-       * 基金的旧最低价大于 0，
-       * 基金的新最低价小于基金的旧最低价。
-       */
-      if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
-          && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
-          && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
-        String title = String.format("价格新低 - %s", entity.getName());
-        String content = String.format("最低价格：%s\\n", entity.getLowPrice());
-
-        if (securityService.hasPosition(entity.getCode())) {
-          title += "（持仓）";
-
-          SecurityModel securityModel = securityService.get(entity.getCode());
-          content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
-              securityModel.getPositionProfitLoss(),
-              securityModel.getPositionProfitLossRatio());
-        }
-
-        content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
-
-        // 异步发送消息。
-        this.imClient.sendGreenMessageByChatIdAsync(priceLowChat, title, content);
-      }
+      // 价格新高。
+      newHighPrice(entity, existingEntity);
+      // 价格新低。
+      newLowPrice(entity, existingEntity);
     }
 
-    // 增加或更新。
+    // 新增或更新。
     if (CollectionUtils.isNotEmpty(entities)) {
       this.saveOrUpdateBatch(entities);
-      log.info("保存或更新 {} 条实体", entities.size());
+      log.info("新增或更新 {} 条实体", entities.size());
     }
   }
 }
