@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.PositionEntity;
@@ -56,7 +54,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   // 当日亏损新低（总体）群组。
   private String dailyLossLowTotalChat;
 
-  private final Map<String, AppTableRecord> positionRecords = new ConcurrentHashMap<>();
+  private final Map<String, String> positionRecordIds = new ConcurrentHashMap<>();
 
   @PostConstruct
   public void init() {
@@ -233,42 +231,53 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     this.saveOrUpdate(entity);
   }
 
-  private void syncBitable(PositionModel model) throws Exception {
-    if (positionRecords.isEmpty()) {
-      synchronized (this.positionRecords) {
-        if (this.positionRecords.isEmpty()) {
-          this.positionRecords.putAll(this.bitableClient.listTableRecords(this.bitable, this.positionTable)
-              .stream()
-              .collect(Collectors.toMap(record -> (String) record.getFields().get("资金名称"), Function.identity())));
-        }
-      }
+  private void loadPositionRecordIds() throws Exception {
+    if (!this.positionRecordIds.isEmpty()) {
+      return;
     }
 
-    List<String> recordIds = new ArrayList<>(positionRecords.size());
-    List<Map<String, Object>> records = new ArrayList<>(positionRecords.size());
+    synchronized (this.positionRecordIds) {
+      if (this.positionRecordIds.isEmpty()) {
+        this.positionRecordIds.putAll(this.bitableClient.listTableRecords(this.bitable, this.positionTable)
+            .stream()
+            .collect(
+                Collectors.toMap(record -> (String) record.getFields().get("资金名称"), record -> record.getRecordId())));
+      }
+    }
+  }
 
-    recordIds.add(positionRecords.get("总资产").getRecordId());
+  private String getPositionRecordId(String fieldName) {
+    return this.positionRecordIds.get(fieldName);
+  }
+
+  private void syncBitable(PositionModel model) throws Exception {
+    this.loadPositionRecordIds();
+
+    List<String> recordIds = new ArrayList<>();
+    List<Map<String, Object>> records = new ArrayList<>();
+
+    recordIds.add(this.getPositionRecordId("总资产"));
     records.add(Map.of("资金值", model.getTotalAssets()));
 
-    recordIds.add(positionRecords.get("证券市值").getRecordId());
+    recordIds.add(this.getPositionRecordId("证券市值"));
     records.add(Map.of("资金值", model.getSecuritiesMarketValue()));
 
-    recordIds.add(positionRecords.get("可用资金").getRecordId());
+    recordIds.add(this.getPositionRecordId("可用资金"));
     records.add(Map.of("资金值", model.getAvailableFunds()));
 
-    recordIds.add(positionRecords.get("持仓盈亏").getRecordId());
+    recordIds.add(this.getPositionRecordId("持仓盈亏"));
     records.add(Map.of("资金值", model.getPositionProfitLoss()));
 
-    recordIds.add(positionRecords.get("资金余额").getRecordId());
+    recordIds.add(this.getPositionRecordId("资金余额"));
     records.add(Map.of("资金值", model.getCashBalance()));
 
-    recordIds.add(positionRecords.get("可取资金").getRecordId());
+    recordIds.add(this.getPositionRecordId("可取资金"));
     records.add(Map.of("资金值", model.getWithdrawableFunds()));
 
-    recordIds.add(positionRecords.get("当日盈亏").getRecordId());
+    recordIds.add(this.getPositionRecordId("当日盈亏"));
     records.add(Map.of("资金值", model.getDailyProfitLoss()));
 
-    recordIds.add(positionRecords.get("冻结资金").getRecordId());
+    recordIds.add(this.getPositionRecordId("冻结资金"));
     records.add(Map.of("资金值", model.getFrozenFunds()));
 
     this.bitableClient.batchUpdateRecords(this.bitable, this.positionTable, recordIds, records);
