@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
@@ -99,11 +98,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(positionProfitHighTotalChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(positionProfitHighTotalChat, title, content);
         }
 
         /*
@@ -127,11 +122,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(positionLossLowTotalChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(positionLossLowTotalChat, title, content);
         }
 
         /*
@@ -154,11 +145,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           String title = String.format("当日盈利新高");
           String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(dailyProfitHighTotalChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(dailyProfitHighTotalChat, title, content);
         }
 
         /*
@@ -181,11 +168,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
           String title = String.format("当日盈利新低");
           String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(dailyLossLowTotalChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日盈利新低消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(dailyLossLowTotalChat, title, content);
         }
       }
 
