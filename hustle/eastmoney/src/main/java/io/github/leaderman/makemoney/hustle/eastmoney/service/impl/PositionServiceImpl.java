@@ -295,7 +295,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   @Transactional
   public void sync(PositionModel model) {
     try {
-      StopWatch sw = new StopWatch();
+      StopWatch sw = new StopWatch("sync");
       sw.start("syncDb");
       this.syncDb(model);
       sw.stop();
@@ -304,9 +304,11 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
       this.syncBitable(model);
       sw.stop();
 
-      log.info(sw.prettyPrint());
-
+      sw.start("syncSecurity");
       this.securityService.sync(model.getSecurities());
+      sw.stop();
+
+      log.info(sw.prettyPrint());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
