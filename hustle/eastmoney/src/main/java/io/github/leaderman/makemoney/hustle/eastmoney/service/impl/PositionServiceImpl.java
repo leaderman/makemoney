@@ -255,7 +255,7 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
         if (this.positionRecords.isEmpty()) {
           this.positionRecords.putAll(this.bitableClient.listTableRecords(this.bitable, this.positionTable)
               .stream()
-              .collect(Collectors.toMap(record -> (String) record.getFields().get("字段名称"), Function.identity())));
+              .collect(Collectors.toMap(record -> (String) record.getFields().get("资金名称"), Function.identity())));
         }
       }
     }
