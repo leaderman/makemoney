@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
@@ -337,17 +336,8 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   @Override
   public void sync(List<SecurityModel> models) {
     try {
-      StopWatch sw = new StopWatch("sync");
-
-      sw.start("syncDb");
       this.syncDb(models);
-      sw.stop();
-
-      sw.start("syncBitable");
       this.syncBitable(models);
-      sw.stop();
-
-      log.info(sw.prettyPrint());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
