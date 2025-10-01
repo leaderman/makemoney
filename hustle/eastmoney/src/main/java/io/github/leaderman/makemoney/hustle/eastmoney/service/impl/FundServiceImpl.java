@@ -1,13 +1,13 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,82 +58,92 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
     Map<String, FundEntity> codeToExistingFundEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list()
         .stream().collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
 
-    // 基金模型列表转换为基金实体列表。
-    // 转换过程中，已存在于数据库中的基金会设置 ID。
-    List<FundEntity> entities = models.stream().map(FundModel::to)
-        .peek(entity -> {
-          FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
-          // 如果基金不存在于数据库中，则跳过。
-          if (Objects.isNull(existingEntity)) {
-            return;
-          }
+    // 是否需要增加或更新。
+    boolean shouldSaveOrUpdate = false;
+    // 需要增加或更新的基金列表。
+    List<FundEntity> entities = new ArrayList<>();
 
-          /*
-           * 价格新高：
-           * 基金的新最高价大于 0，
-           * 基金的旧最高价大于 0，
-           * 基金的新最高价大于基金的旧最高价。
-           */
-          if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
-            String title = String.format("价格新高 - %s", entity.getName());
-            String content = String.format("最高价格：%s\\n", entity.getHighPrice());
+    for (FundModel model : models) {
+      FundEntity entity = FundModel.to(model);
 
-            if (securityService.hasPosition(entity.getCode())) {
-              title += "（持仓）";
+      FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
+      if (Objects.isNull(existingEntity)) {
+        // 基金不存在于数据库中，需要增加。
+        shouldSaveOrUpdate = true;
+        entities.add(entity);
 
-              SecurityModel securityModel = securityService.get(entity.getCode());
-              content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
-                  securityModel.getPositionProfitLoss(), securityModel.getPositionProfitLossRatio());
-            }
+        continue;
+      }
 
-            content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
+      if (FundEntity.equals(entity, existingEntity)) {
+        // 基金已存在于数据库中，且数据相同，跳过。
+        continue;
+      }
 
-            try {
-              this.imClient.sendRedMessageByChatId(priceHighChat, title, content);
-            } catch (Exception e) {
-              log.error("发送价格新高消息错误：{}", ExceptionUtils.getStackTrace(e));
-            }
-          }
+      // 基金已存在于数据库中，但数据不同，需要更新。
+      // 注意：设置 ID。
+      entity.setId(existingEntity.getId());
+      shouldSaveOrUpdate = true;
+      entities.add(entity);
 
-          /*
-           * 价格新低：
-           * 基金的新最低价大于 0，
-           * 基金的旧最低价大于 0，
-           * 基金的新最低价小于基金的旧最低价。
-           */
-          if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
-              && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
-              && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
-            String title = String.format("价格新低 - %s", entity.getName());
-            String content = String.format("最低价格：%s\\n", entity.getLowPrice());
+      /*
+       * 价格新高：
+       * 基金的新最高价大于 0，
+       * 基金的旧最高价大于 0，
+       * 基金的新最高价大于基金的旧最高价。
+       */
+      if (NumberUtil.greaterThan(entity.getHighPrice(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(existingEntity.getHighPrice(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(entity.getHighPrice(), existingEntity.getHighPrice())) {
+        String title = String.format("价格新高 - %s", entity.getName());
+        String content = String.format("最高价格：%s\\n", entity.getHighPrice());
 
-            if (securityService.hasPosition(entity.getCode())) {
-              title += "（持仓）";
+        if (securityService.hasPosition(entity.getCode())) {
+          title += "（持仓）";
 
-              SecurityModel securityModel = securityService.get(entity.getCode());
-              content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
-                  securityModel.getPositionProfitLoss(),
-                  securityModel.getPositionProfitLossRatio());
-            }
+          SecurityModel securityModel = securityService.get(entity.getCode());
+          content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+              securityModel.getPositionProfitLoss(), securityModel.getPositionProfitLossRatio());
+        }
 
-            content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
+        content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
 
-            try {
-              this.imClient.sendGreenMessageByChatId(priceLowChat, title, content);
-            } catch (Exception e) {
-              log.error("发送价格新低消息错误：{}", ExceptionUtils.getStackTrace(e));
-            }
-          }
+        // 异步发送消息。
+        this.imClient.sendRedMessageByChatIdAsync(priceHighChat, title, content);
+      }
 
-          // 设置 ID。
-          entity.setId(existingEntity.getId());
-        })
-        .collect(Collectors.toList());
+      /*
+       * 价格新低：
+       * 基金的新最低价大于 0，
+       * 基金的旧最低价大于 0，
+       * 基金的新最低价小于基金的旧最低价。
+       */
+      if (NumberUtil.greaterThan(entity.getLowPrice(), BigDecimal.ZERO)
+          && NumberUtil.greaterThan(existingEntity.getLowPrice(), BigDecimal.ZERO)
+          && NumberUtil.lessThan(entity.getLowPrice(), existingEntity.getLowPrice())) {
+        String title = String.format("价格新低 - %s", entity.getName());
+        String content = String.format("最低价格：%s\\n", entity.getLowPrice());
 
-    // 保存或更新。
-    this.saveOrUpdateBatch(entities);
-    log.info("保存或更新 {} 条实体", entities.size());
+        if (securityService.hasPosition(entity.getCode())) {
+          title += "（持仓）";
+
+          SecurityModel securityModel = securityService.get(entity.getCode());
+          content += String.format("成本价格：%s\\n盈亏金额：%s\\n盈亏比例：%s\\n", securityModel.getCostPrice(),
+              securityModel.getPositionProfitLoss(),
+              securityModel.getPositionProfitLossRatio());
+        }
+
+        content += String.format("日期时间：%s", DatetimeUtil.getDatetime());
+
+        // 异步发送消息。
+        this.imClient.sendGreenMessageByChatIdAsync(priceLowChat, title, content);
+      }
+    }
+
+    // 增加或更新。
+    if (shouldSaveOrUpdate) {
+      this.saveOrUpdateBatch(entities);
+      log.info("保存或更新 {} 条实体", entities.size());
+    }
   }
 }

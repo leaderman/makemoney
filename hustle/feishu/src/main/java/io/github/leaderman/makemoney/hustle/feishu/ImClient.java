@@ -2,6 +2,8 @@ package io.github.leaderman.makemoney.hustle.feishu;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,12 +13,14 @@ import com.lark.oapi.service.im.v1.model.CreateMessageResp;
 
 import io.github.leaderman.makemoney.hustle.limiter.LimiterClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 消息客户端。
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ImClient {
   private final LimiterClient limiterClient;
   private final FeishuClient feishuClient;
@@ -335,6 +339,22 @@ public class ImClient {
   }
 
   /**
+   * 异步发送绿色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   */
+  @Async
+  public void sendGreenMessageByChatIdAsync(String chatId, String title, String content) {
+    try {
+      this.sendGreenMessageByChatId(chatId, title, content);
+    } catch (Exception e) {
+      log.error("发送绿色消息错误：{}", ExceptionUtils.getStackTrace(e));
+    }
+  }
+
+  /**
    * 发送黄色消息。
    * 
    * @param chatId  群 ID。
@@ -358,5 +378,21 @@ public class ImClient {
    */
   public String sendRedMessageByChatId(String chatId, String title, String content) throws Exception {
     return this.sendErrorMessageByChatId(chatId, title, content);
+  }
+
+  /**
+   * 异步发送红色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   */
+  @Async
+  public void sendRedMessageByChatIdAsync(String chatId, String title, String content) {
+    try {
+      this.sendRedMessageByChatId(chatId, title, content);
+    } catch (Exception e) {
+      log.error("发送红色消息错误：{}", ExceptionUtils.getStackTrace(e));
+    }
   }
 }

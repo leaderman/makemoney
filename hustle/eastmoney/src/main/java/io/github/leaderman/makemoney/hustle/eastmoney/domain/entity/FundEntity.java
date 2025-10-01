@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import io.github.leaderman.makemoney.hustle.domain.entity.BaseEntity;
+import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -23,4 +24,16 @@ public class FundEntity extends BaseEntity {
   private BigDecimal changePercent;
   private BigDecimal changeAmount;
   private BigDecimal prevClose;
+
+  public static boolean equals(FundEntity left, FundEntity right) {
+    return left.getCode().equals(right.getCode())
+        && left.getName().equals(right.getName())
+        && NumberUtil.equals(left.getOpenPrice(), right.getOpenPrice())
+        && NumberUtil.equals(left.getLatestPrice(), right.getLatestPrice())
+        && NumberUtil.equals(left.getHighPrice(), right.getHighPrice())
+        && NumberUtil.equals(left.getLowPrice(), right.getLowPrice())
+        && NumberUtil.equals(left.getChangePercent(), right.getChangePercent())
+        && NumberUtil.equals(left.getChangeAmount(), right.getChangeAmount())
+        && NumberUtil.equals(left.getPrevClose(), right.getPrevClose());
+  }
 }
