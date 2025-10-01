@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -74,7 +73,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   }
 
   private void syncDb(List<SecurityModel> securities) {
-    // 创建实体列表。
+    // 新增实体列表。
     List<SecurityEntity> creatEntities = new ArrayList<>();
 
     // 更新实体列表。
@@ -98,10 +97,14 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       SecurityEntity security = entry.getValue();
 
       if (!rightEntities.containsKey(securityCode)) {
-        // 创建实体。
+        // 证券不存在于数据库中，需要新增。
         creatEntities.add(security);
       } else {
         SecurityEntity existingSecurity = rightEntities.get(securityCode);
+        if (SecurityEntity.equals(security, existingSecurity)) {
+          // 证券已存在于数据库中，且数据相同，跳过。
+          continue;
+        }
 
         // 持仓盈利。
         if (NumberUtil.lessThanOrEqualTo(existingSecurity.getPositionProfitLoss(), BigDecimal.ZERO)
@@ -110,11 +113,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(positionProfitSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(positionProfitSecurityChat, title, content);
         }
 
         // 持仓亏损。
@@ -124,11 +123,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(positionLossSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(positionLossSecurityChat, title, content);
         }
 
         // 持仓盈利新高。
@@ -138,11 +133,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(positionProfitHighSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(positionProfitHighSecurityChat, title, content);
         }
 
         // 持仓亏损新低。
@@ -152,11 +143,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getPositionProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(positionLossLowSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送持仓亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(positionLossLowSecurityChat, title, content);
         }
 
         // 当日盈利。
@@ -166,11 +153,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(dailyProfitSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日盈利消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(dailyProfitSecurityChat, title, content);
         }
 
         // 当日亏损。
@@ -180,11 +163,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(dailyLossSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日亏损消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(dailyLossSecurityChat, title, content);
         }
 
         // 当日盈利新高。
@@ -194,11 +173,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("盈利金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendRedMessageByChatId(dailyProfitHighSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日盈利新高消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendRedMessageByChatIdAsync(dailyProfitHighSecurityChat, title, content);
         }
 
         // 当日亏损新低。
@@ -208,16 +183,10 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           String content = String.format("亏损金额：%s\\n日期时间：%s", security.getDailyProfitLoss(),
               DatetimeUtil.getDatetime());
 
-          try {
-            this.imClient.sendGreenMessageByChatId(dailyLossLowSecurityChat, title, content);
-          } catch (Exception e) {
-            log.error("发送当日亏损新低消息错误：{}", ExceptionUtils.getStackTrace(e));
-          }
+          this.imClient.sendGreenMessageByChatIdAsync(dailyLossLowSecurityChat, title, content);
         }
 
-        // 更新实体。
-        security.setId(existingSecurity.getId());
-
+        // 修正持仓盈亏最大值和最小值。
         if (NumberUtil.greaterThan(existingSecurity.getPositionProfitLossMax(), security.getPositionProfitLoss())) {
           security.setPositionProfitLossMax(existingSecurity.getPositionProfitLossMax());
         }
@@ -225,6 +194,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           security.setPositionProfitLossMin(existingSecurity.getPositionProfitLossMin());
         }
 
+        // 修正当日盈亏最大值和最小值。
         if (NumberUtil.greaterThan(existingSecurity.getDailyProfitLossMax(), security.getDailyProfitLoss())) {
           security.setDailyProfitLossMax(existingSecurity.getDailyProfitLossMax());
         }
@@ -232,6 +202,8 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
           security.setDailyProfitLossMin(existingSecurity.getDailyProfitLossMin());
         }
 
+        // 更新实体。
+        security.setId(existingSecurity.getId());
         updateEntities.add(security);
       }
     }
@@ -245,20 +217,17 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     }
 
     if (CollectionUtils.isNotEmpty(creatEntities)) {
-      // 创建。
-      log.info("创建 {} 条实体", creatEntities.size());
+      // 新增。
       this.saveBatch(creatEntities);
     }
 
     if (CollectionUtils.isNotEmpty(updateEntities)) {
       // 更新。
-      log.info("更新 {} 条实体", updateEntities.size());
       this.updateBatchById(updateEntities);
     }
 
     if (CollectionUtils.isNotEmpty(deleteIds)) {
       // 删除。
-      log.info("删除 {} 条实体", deleteIds.size());
       this.removeByIds(deleteIds);
     }
   }
