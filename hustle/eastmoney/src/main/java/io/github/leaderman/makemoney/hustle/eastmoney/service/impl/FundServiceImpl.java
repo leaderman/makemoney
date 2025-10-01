@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,8 +59,6 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
     Map<String, FundEntity> codeToExistingFundEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list()
         .stream().collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
 
-    // 是否需要增加或更新。
-    boolean shouldSaveOrUpdate = false;
     // 需要增加或更新的基金列表。
     List<FundEntity> entities = new ArrayList<>();
 
@@ -69,7 +68,6 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
       FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
       if (Objects.isNull(existingEntity)) {
         // 基金不存在于数据库中，需要增加。
-        shouldSaveOrUpdate = true;
         entities.add(entity);
 
         continue;
@@ -83,7 +81,6 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
       // 基金已存在于数据库中，但数据不同，需要更新。
       // 注意：设置 ID。
       entity.setId(existingEntity.getId());
-      shouldSaveOrUpdate = true;
       entities.add(entity);
 
       /*
@@ -141,7 +138,7 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
     }
 
     // 增加或更新。
-    if (shouldSaveOrUpdate) {
+    if (CollectionUtils.isNotEmpty(entities)) {
       this.saveOrUpdateBatch(entities);
       log.info("保存或更新 {} 条实体", entities.size());
     }
