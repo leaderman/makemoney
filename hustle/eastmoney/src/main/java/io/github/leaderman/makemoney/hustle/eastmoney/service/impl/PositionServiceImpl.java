@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
@@ -294,8 +295,16 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   @Transactional
   public void sync(PositionModel model) {
     try {
+      StopWatch sw = new StopWatch();
+      sw.start("syncDb");
       this.syncDb(model);
+      sw.stop();
+
+      sw.start("syncBitable");
       this.syncBitable(model);
+      sw.stop();
+
+      log.info(sw.prettyPrint());
 
       this.securityService.sync(model.getSecurities());
     } catch (Exception e) {
