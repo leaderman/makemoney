@@ -68,176 +68,166 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
     this.dailyLossLowTotalChat = this.configClient.getString("feishu.chat.daily.loss.low.total");
   }
 
-  private void syncDb(PositionModel model) {
-    PositionEntity entity = this.getOne(null);
-    if (Objects.isNull(entity)) {
-      entity = PositionModel.toEntity(model);
-    } else {
-      // 资金持仓更新时间必须是当天才进行监控。
-      if (DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
-        /*
-         * 持仓盈利新高（总体）:
-         * 
-         * 持仓盈亏新值大于 0，
-         * 持仓盈亏旧值大于 0，
-         * 持仓盈亏新值大于持仓盈亏旧值；
-         * 
-         * 或者
-         * 
-         * 持仓盈亏旧值小于或等于 0，
-         * 持仓盈亏新值大于 0。
-         */
-        if (NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.greaterThan(entity.getPositionProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
-            || NumberUtil.lessThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
-                && NumberUtil.greaterThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
-          String title = String.format("持仓盈利新高");
-          String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(),
-              DatetimeUtil.getDatetime());
+  private void newPositionProfitLossMax(PositionEntity entity, PositionEntity existingEntity) {
+    /*
+     * 持仓盈利新高:
+     * 
+     * 持仓盈亏新最大值大于 0，
+     * 持仓盈亏新最大值大于旧最大值；
+     * 
+     */
+    if (NumberUtil.greaterThan(entity.getPositionProfitLossMax(), BigDecimal.ZERO)
+        && NumberUtil.greaterThan(entity.getPositionProfitLossMax(), existingEntity.getPositionProfitLossMax())) {
+      String title = String.format("持仓盈利新高");
+      String content = String.format("盈利金额：%s\\n日期时间：%s", entity.getPositionProfitLossMax(),
+          DatetimeUtil.getDatetime());
 
-          this.imClient.sendRedMessageByChatIdAsync(positionProfitHighTotalChat, title, content);
-        }
+      this.imClient.sendRedMessageByChatIdAsync(positionProfitHighTotalChat, title, content);
+    }
+  }
 
-        /*
-         * 持仓亏损新低（总体）：
-         * 
-         * 持仓盈亏新值小于 0，
-         * 持仓盈亏旧值小于 0，
-         * 持仓盈亏新值小于持仓盈亏旧值；
-         * 
-         * 或者
-         * 
-         * 持仓盈亏旧值大于或等于 0，
-         * 持仓盈亏新值小于 0。
-         */
-        if (NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.lessThan(entity.getPositionProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
-            || NumberUtil.greaterThanOrEqualTo(entity.getPositionProfitLoss(), BigDecimal.ZERO)
-                && NumberUtil.lessThan(model.getPositionProfitLoss(), BigDecimal.ZERO)) {
-          String title = String.format("持仓亏损新低");
-          String content = String.format("盈利金额：%s\\n日期时间：%s", model.getPositionProfitLoss(),
-              DatetimeUtil.getDatetime());
+  private void newPositionProfitLossMin(PositionEntity entity, PositionEntity existingEntity) {
+    /*
+     * 持仓亏损新低:
+     * 
+     * 持仓盈亏新最小值小于 0，
+     * 持仓盈亏新最小值小于旧最小值；
+     * 
+     */
+    if (NumberUtil.lessThan(entity.getPositionProfitLossMin(), BigDecimal.ZERO)
+        && NumberUtil.lessThan(entity.getPositionProfitLossMin(), existingEntity.getPositionProfitLossMin())) {
+      String title = String.format("持仓亏损新低");
+      String content = String.format("亏损金额：%s\\n日期时间：%s", entity.getPositionProfitLossMin(),
+          DatetimeUtil.getDatetime());
 
-          this.imClient.sendGreenMessageByChatIdAsync(positionLossLowTotalChat, title, content);
-        }
+      this.imClient.sendGreenMessageByChatIdAsync(positionLossLowTotalChat, title, content);
+    }
+  }
 
-        /*
-         * 当日盈利新高（总体）：
-         * 
-         * 当日盈亏新值大于 0，
-         * 当日盈亏旧值大于 0，
-         * 当日盈亏新值大于当日盈亏旧值；
-         * 
-         * 或者
-         * 
-         * 当日盈亏旧值小于或等于 0，
-         * 当日盈亏新值大于 0。
-         */
-        if (NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.greaterThan(entity.getDailyProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
-            || NumberUtil.lessThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
-                && NumberUtil.greaterThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
-          String title = String.format("当日盈利新高");
-          String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+  private void newDailyProfitLossMax(PositionEntity entity, PositionEntity existingEntity) {
+    /*
+     * 当日盈利新高:
+     * 
+     * 当日盈亏新最大值大于 0，
+     * 当日盈亏新最大值大于旧最大值；
+     * 
+     */
+    if (NumberUtil.greaterThan(entity.getDailyProfitLossMax(), BigDecimal.ZERO)
+        && NumberUtil.greaterThan(entity.getDailyProfitLossMax(), existingEntity.getDailyProfitLossMax())) {
+      String title = String.format("当日盈利新高");
+      String content = String.format("盈利金额：%s\\n日期时间：%s", entity.getDailyProfitLossMax(),
+          DatetimeUtil.getDatetime());
 
-          this.imClient.sendRedMessageByChatIdAsync(dailyProfitHighTotalChat, title, content);
-        }
+      this.imClient.sendRedMessageByChatIdAsync(dailyProfitHighTotalChat, title, content);
+    }
+  }
 
-        /*
-         * 当日亏损新低（总体）：
-         * 
-         * 当日盈亏新值小于 0，
-         * 当日盈亏旧值小于 0，
-         * 当日盈亏新值小于当日盈亏旧值；
-         * 
-         * 或者
-         * 
-         * 当日盈亏旧值大于或等于 0，
-         * 当日盈亏新值小于 0。
-         */
-        if (NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.lessThan(entity.getDailyProfitLoss(), BigDecimal.ZERO)
-            && NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
-            || NumberUtil.greaterThanOrEqualTo(entity.getDailyProfitLoss(), BigDecimal.ZERO)
-                && NumberUtil.lessThan(model.getDailyProfitLoss(), BigDecimal.ZERO)) {
-          String title = String.format("当日盈利新低");
-          String content = String.format("盈利金额：%s\\n日期时间：%s", model.getDailyProfitLoss(), DatetimeUtil.getDatetime());
+  private void newDailyProfitLossMin(PositionEntity entity, PositionEntity existingEntity) {
+    /*
+     * 当日亏损新低:
+     * 
+     * 当日盈亏新最小值小于 0，
+     * 当日盈亏新最小值小于旧最小值；
+     * 
+     */
+    if (NumberUtil.lessThan(entity.getDailyProfitLossMin(), BigDecimal.ZERO)
+        && NumberUtil.lessThan(entity.getDailyProfitLossMin(), existingEntity.getDailyProfitLossMin())) {
+      String title = String.format("当日亏损新低");
+      String content = String.format("亏损金额：%s\\n日期时间：%s", entity.getDailyProfitLossMin(),
+          DatetimeUtil.getDatetime());
 
-          this.imClient.sendGreenMessageByChatIdAsync(dailyLossLowTotalChat, title, content);
-        }
-      }
+      this.imClient.sendGreenMessageByChatIdAsync(dailyLossLowTotalChat, title, content);
+    }
+  }
 
-      // 更新实体。
-      // 注意：更新时间必须手动设置当前时间。
-      entity.setTotalAssets(model.getTotalAssets());
-      entity.setSecuritiesMarketValue(model.getSecuritiesMarketValue());
-      entity.setAvailableFunds(model.getAvailableFunds());
+  private boolean syncDb(PositionModel model) {
+    PositionEntity entity = PositionModel.toEntity(model);
 
-      entity.setPositionProfitLoss(model.getPositionProfitLoss());
-
-      /*
-       * 更新持仓盈亏最大值：
-       * 持仓盈亏新值大于持仓盈亏旧值，
-       * 或持仓盈亏更新时间不是当天。
-       */
-      if (NumberUtil.greaterThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMax())
-          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
-        entity.setPositionProfitLossMax(model.getPositionProfitLoss());
-      }
-
-      /*
-       * 更新持仓盈亏最小值：
-       * 持仓盈亏新值小于持仓盈亏旧值，
-       * 或持仓盈亏更新时间不是当天。
-       */
-      if (NumberUtil.lessThan(model.getPositionProfitLoss(), entity.getPositionProfitLossMin())
-          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
-        // 更新持仓盈亏最小值。
-        entity.setPositionProfitLossMin(model.getPositionProfitLoss());
-      }
-
-      entity.setCashBalance(model.getCashBalance());
-      entity.setWithdrawableFunds(model.getWithdrawableFunds());
-
-      entity.setDailyProfitLoss(model.getDailyProfitLoss());
-
-      /*
-       * 更新当日盈亏最大值：
-       * 当日盈亏新值大于当日盈亏旧值，
-       * 或当日盈亏更新时间不是当天。
-       */
-      if (NumberUtil.greaterThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMax())
-          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
-        entity.setDailyProfitLossMax(model.getDailyProfitLoss());
-      }
-
-      /*
-       * 更新当日盈亏最小值：
-       * 当日盈亏新值小于当日盈亏旧值，
-       * 或当日盈亏更新时间不是当天。
-       */
-      if (NumberUtil.lessThan(model.getDailyProfitLoss(), entity.getDailyProfitLossMin())
-          || !DatetimeUtil.isSameDay(entity.getUpdatedAt(), LocalDateTime.now())) {
-        entity.setDailyProfitLossMin(model.getDailyProfitLoss());
-      }
-
-      entity.setFrozenFunds(model.getFrozenFunds());
-      entity.setUpdatedAt(LocalDateTime.now());
+    PositionEntity existingEntity = this.getOne(null);
+    if (Objects.isNull(existingEntity)) {
+      // 资金持仓不存在于数据库中，需要新增。
+      return this.save(entity);
     }
 
-    this.saveOrUpdate(entity);
+    if (PositionEntity.equals(entity, existingEntity)) {
+      // 资金持仓存在于数据库中，且数据相同，跳过。
+      return false;
+    }
+
+    // 资金持仓存在于数据库中，但数据不同，需要更新。
+    // 注意：设置 ID。
+    entity.setId(existingEntity.getId());
+
+    /*
+     * 修正持仓盈亏最大值：
+     * 资金持仓更新更新时间是当天，
+     * 且持仓盈亏旧值大于新值。
+     */
+    if (DatetimeUtil.isSameDay(existingEntity.getUpdatedAt(), LocalDateTime.now())
+        && NumberUtil.greaterThan(existingEntity.getPositionProfitLossMax(), entity.getPositionProfitLossMax())) {
+      // 使用旧值。
+      entity.setPositionProfitLossMax(existingEntity.getPositionProfitLossMax());
+    }
+
+    /*
+     * 修正持仓盈亏最小值：
+     * 资金持仓更新时间是当天，
+     * 且持仓盈亏旧值小于新值。
+     */
+    if (DatetimeUtil.isSameDay(existingEntity.getUpdatedAt(), LocalDateTime.now())
+        && NumberUtil.lessThan(existingEntity.getPositionProfitLossMin(), entity.getPositionProfitLossMin())) {
+      // 使用旧值。
+      entity.setPositionProfitLossMin(existingEntity.getPositionProfitLossMin());
+    }
+
+    /*
+     * 修正当日盈亏最大值：
+     * 资金持仓更新时间是当天，
+     * 且当日盈亏旧值小于新值。
+     */
+    if (DatetimeUtil.isSameDay(existingEntity.getUpdatedAt(), LocalDateTime.now())
+        && NumberUtil.greaterThan(existingEntity.getDailyProfitLossMax(), entity.getDailyProfitLossMax())) {
+      // 使用旧值。
+      entity.setDailyProfitLossMax(existingEntity.getDailyProfitLossMax());
+    }
+
+    /*
+     * 修正当日盈亏最小值：
+     * 资金持仓更新时间是当天，
+     * 且当日盈亏旧值小于新值。
+     */
+    if (DatetimeUtil.isSameDay(existingEntity.getUpdatedAt(), LocalDateTime.now())
+        && NumberUtil.lessThan(existingEntity.getDailyProfitLossMin(), entity.getDailyProfitLossMin())) {
+      // 使用旧值。
+      entity.setDailyProfitLossMin(existingEntity.getDailyProfitLossMin());
+    }
+
+    // 资金持仓更新时间是当天才进行盈亏监测。
+    if (DatetimeUtil.isSameDay(existingEntity.getUpdatedAt(), LocalDateTime.now())) {
+      // 持仓盈利新高。
+      this.newPositionProfitLossMax(entity, existingEntity);
+      // 持仓亏损新低。
+      this.newPositionProfitLossMin(entity, existingEntity);
+      // 当日盈利新高。
+      this.newDailyProfitLossMax(entity, existingEntity);
+      // 当日亏损新低。
+      this.newDailyProfitLossMin(entity, existingEntity);
+    }
+
+    return this.updateById(entity);
+  }
+
+  private boolean hasPositionRecordIds() {
+    return !this.positionRecordIds.isEmpty();
   }
 
   private void loadPositionRecordIds() throws Exception {
-    if (!this.positionRecordIds.isEmpty()) {
+    if (this.hasPositionRecordIds()) {
       return;
     }
 
     synchronized (this.positionRecordIds) {
-      if (this.positionRecordIds.isEmpty()) {
+      if (!this.hasPositionRecordIds()) {
         this.positionRecordIds.putAll(this.bitableClient.listTableRecords(this.bitable, this.positionTable)
             .stream()
             .collect(
@@ -251,34 +241,35 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   }
 
   private void syncBitable(PositionModel model) throws Exception {
-    this.loadPositionRecordIds();
-
-    List<String> recordIds = new ArrayList<>();
     List<Map<String, Object>> records = new ArrayList<>();
 
+    records.add(Map.of("资金名称", "总资产", "资金值", model.getTotalAssets()));
+    records.add(Map.of("资金名称", "证券市值", "资金值", model.getSecuritiesMarketValue()));
+    records.add(Map.of("资金名称", "可用资金", "资金值", model.getAvailableFunds()));
+    records.add(Map.of("资金名称", "持仓盈亏", "资金值", model.getPositionProfitLoss()));
+    records.add(Map.of("资金名称", "资金余额", "资金值", model.getCashBalance()));
+    records.add(Map.of("资金名称", "可取资金", "资金值", model.getWithdrawableFunds()));
+    records.add(Map.of("资金名称", "当日盈亏", "资金值", model.getDailyProfitLoss()));
+    records.add(Map.of("资金名称", "冻结资金", "资金值", model.getFrozenFunds()));
+
+    this.loadPositionRecordIds();
+    if (!this.hasPositionRecordIds()) {
+      // 资金持仓不存在于多维表格中，需要新增。
+      this.bitableClient.batchCreateRecords(this.bitable, this.positionTable, records);
+      return;
+    }
+
+    // 资金持仓已存在于多维表格中，且数据不同，需要更新。
+    List<String> recordIds = new ArrayList<>();
+
     recordIds.add(this.getPositionRecordId("总资产"));
-    records.add(Map.of("资金值", model.getTotalAssets()));
-
     recordIds.add(this.getPositionRecordId("证券市值"));
-    records.add(Map.of("资金值", model.getSecuritiesMarketValue()));
-
     recordIds.add(this.getPositionRecordId("可用资金"));
-    records.add(Map.of("资金值", model.getAvailableFunds()));
-
     recordIds.add(this.getPositionRecordId("持仓盈亏"));
-    records.add(Map.of("资金值", model.getPositionProfitLoss()));
-
     recordIds.add(this.getPositionRecordId("资金余额"));
-    records.add(Map.of("资金值", model.getCashBalance()));
-
     recordIds.add(this.getPositionRecordId("可取资金"));
-    records.add(Map.of("资金值", model.getWithdrawableFunds()));
-
     recordIds.add(this.getPositionRecordId("当日盈亏"));
-    records.add(Map.of("资金值", model.getDailyProfitLoss()));
-
     recordIds.add(this.getPositionRecordId("冻结资金"));
-    records.add(Map.of("资金值", model.getFrozenFunds()));
 
     this.bitableClient.batchUpdateRecords(this.bitable, this.positionTable, recordIds, records);
   }
@@ -287,8 +278,12 @@ public class PositionServiceImpl extends ServiceImpl<PositionMapper, PositionEnt
   @Transactional
   public void sync(PositionModel model) {
     try {
-      this.syncDb(model);
-      this.syncBitable(model);
+      // 同步资金持仓。
+      if (this.syncDb(model)) {
+        this.syncBitable(model);
+      }
+
+      // 同步证券。
       this.securityService.sync(model.getSecurities());
     } catch (Exception e) {
       throw new RuntimeException(e);
