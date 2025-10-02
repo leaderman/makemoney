@@ -213,18 +213,21 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       // 新增。
       this.saveBatch(createEntities);
       changed = true;
+      log.info("新增 {} 条实体", createEntities.size());
     }
 
     if (CollectionUtils.isNotEmpty(updateEntities)) {
       // 更新。
       this.updateBatchById(updateEntities);
       changed = true;
+      log.info("更新 {} 条实体", updateEntities.size());
     }
 
     if (CollectionUtils.isNotEmpty(deleteEntities)) {
       // 删除。
       this.removeByIds(deleteEntities.stream().map(SecurityEntity::getId).collect(Collectors.toList()));
       changed = true;
+      log.info("删除 {} 条实体", deleteEntities.size());
     }
 
     return changed;
@@ -325,16 +328,19 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     if (!createRecords.isEmpty()) {
       // 新增。
       this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, createRecords);
+      log.info("新增 {} 条记录", createRecords.size());
     }
 
     if (!updateRecordIds.isEmpty()) {
       // 更新。
       this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, updateRecordIds, updateRecords);
+      log.info("更新 {} 条记录", updateRecordIds.size());
     }
 
     if (!deleteRecordIds.isEmpty()) {
       // 删除。
       this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, deleteRecordIds);
+      log.info("删除 {} 条记录", deleteRecordIds.size());
     }
   }
 
