@@ -84,6 +84,7 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public void sync(List<OrderModel> orders) {
     try {
+      // 获取多维表格中的记录。
       Map<String, AppTableRecord> existingRecords = Optional
           .ofNullable(this.bitableClient.listTableRecords(this.bitable, this.ordersTable))
           .map(records -> records.stream().collect(Collectors.toMap(this::getOrderId, Function.identity())))
