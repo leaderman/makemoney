@@ -109,7 +109,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         AppTableRecord existingRecord = existingRecords.get(orderId);
-        log.info("equals: {}", OrderModel.equals(order, toModel(existingRecord)));
         if (OrderModel.equals(order, toModel(existingRecord))) {
           // 委托存在于多维表格中，且数据相同，跳过。
           continue;
