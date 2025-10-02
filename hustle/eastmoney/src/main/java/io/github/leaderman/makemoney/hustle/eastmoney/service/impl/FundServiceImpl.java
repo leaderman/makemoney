@@ -113,8 +113,8 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
 
     // 从数据库中获取代码对应的基金。
     // 注意：如果代码对应的基金不存在于数据库中，则不会出现在结果中。
-    Map<String, FundEntity> codeToExistingFundEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list()
-        .stream().collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
+    Map<String, FundEntity> existingEntities = this.lambdaQuery().in(FundEntity::getCode, codes).list().stream()
+        .collect(Collectors.toMap(FundEntity::getCode, Function.identity()));
 
     // 需要新增或更新的基金列表。
     List<FundEntity> entities = new ArrayList<>();
@@ -122,7 +122,7 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
     for (FundModel model : models) {
       FundEntity entity = FundModel.to(model);
 
-      FundEntity existingEntity = codeToExistingFundEntities.get(entity.getCode());
+      FundEntity existingEntity = existingEntities.get(entity.getCode());
       if (Objects.isNull(existingEntity)) {
         // 基金不存在于数据库中，需要新增。
         entities.add(entity);
@@ -131,11 +131,11 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
       }
 
       if (FundEntity.equals(entity, existingEntity)) {
-        // 基金已存在于数据库中，且数据相同，跳过。
+        // 基金存在于数据库中，且数据相同，跳过。
         continue;
       }
 
-      // 基金已存在于数据库中，但数据不同，需要更新。
+      // 基金存在于数据库中，但数据不同，需要更新。
       // 注意：设置 ID。
       entity.setId(existingEntity.getId());
       entities.add(entity);
