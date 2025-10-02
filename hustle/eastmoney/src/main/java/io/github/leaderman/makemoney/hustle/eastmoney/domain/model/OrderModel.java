@@ -58,8 +58,7 @@ public class OrderModel extends BaseModel {
   }
 
   public static boolean equals(OrderModel left, OrderModel right) {
-    return left.getOrderId().equals(right.getOrderId())
-        && left.getOrderTime().equals(right.getOrderTime())
+    return left.getOrderTime().equals(right.getOrderTime())
         && left.getSecurityCode().equals(right.getSecurityCode())
         && left.getSecurityName().equals(right.getSecurityName())
         && left.getOrderSide().equals(right.getOrderSide())
@@ -69,6 +68,7 @@ public class OrderModel extends BaseModel {
         && left.getFilledQuantity().equals(right.getFilledQuantity())
         && left.getFilledAmount().equals(right.getFilledAmount())
         && left.getAvgFilledPrice().equals(right.getAvgFilledPrice())
+        && left.getOrderId().equals(right.getOrderId())
         && left.getCurrency().equals(right.getCurrency());
   }
 }
