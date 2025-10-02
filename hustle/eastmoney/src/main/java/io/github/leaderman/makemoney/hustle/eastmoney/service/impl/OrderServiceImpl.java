@@ -2,15 +2,12 @@ package io.github.leaderman.makemoney.hustle.eastmoney.service.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
@@ -34,17 +31,22 @@ public class OrderServiceImpl implements OrderService {
   private String bitable;
   private String ordersTable;
 
+  // 多维表格记录缓存。
+  private final Map<String, OrderModel> orderRecords = new ConcurrentHashMap<>();
+  // 多维表格记录 ID 缓存。
+  private final Map<String, String> orderRecordIds = new ConcurrentHashMap<>();
+
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
     this.ordersTable = this.configClient.getString("eastmoney.bitable.orders");
   }
 
-  private boolean shouldUpdateRecord(AppTableRecord record) {
-    return record.getFields().get("委托状态").equals("已报");
+  private boolean hasOrderRecords() {
+    return !this.orderRecords.isEmpty();
   }
 
-  private OrderModel toOrderModel(AppTableRecord record) {
+  private OrderModel toModel(AppTableRecord record) {
     OrderModel order = new OrderModel();
 
     order.setOrderTime((String) record.getFields().get("委托时间"));
@@ -61,6 +63,44 @@ public class OrderServiceImpl implements OrderService {
     order.setCurrency((String) record.getFields().get("币种"));
 
     return order;
+  }
+
+  private synchronized void reloadOrderRecords() throws Exception {
+    this.orderRecords.clear();
+    this.orderRecordIds.clear();
+
+    List<AppTableRecord> records = this.bitableClient.listTableRecords(this.bitable, this.ordersTable);
+    if (CollectionUtils.isEmpty(records)) {
+      return;
+    }
+
+    records.forEach(record -> {
+      OrderModel order = toModel(record);
+
+      this.orderRecords.put(order.getOrderId(), order);
+      this.orderRecordIds.put(order.getOrderId(), record.getRecordId());
+    });
+  }
+
+  private boolean hasOrderId(String orderId) {
+    return this.orderRecords.containsKey(orderId);
+  }
+
+  private OrderModel getOrder(String orderId) {
+    return this.orderRecords.get(orderId);
+  }
+
+  private String getOrderRecordId(String orderId) {
+    return this.orderRecordIds.get(orderId);
+  }
+
+  private void addOrderRecords(List<AppTableRecord> records) {
+    records.forEach(record -> {
+      OrderModel order = toModel(record);
+
+      this.orderRecords.put(order.getOrderId(), order);
+      this.orderRecordIds.put(order.getOrderId(), record.getRecordId());
+    });
   }
 
   private Map<String, Object> toRecord(OrderModel order) {
@@ -85,45 +125,49 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public void sync(List<OrderModel> orders) {
     try {
-      Map<String, OrderModel> leftRecords = orders.stream()
-          .collect(Collectors.toMap(OrderModel::getOrderId, Function.identity()));
+      if (!this.hasOrderRecords()) {
+        this.reloadOrderRecords();
+      }
 
-      Map<String, AppTableRecord> rightRecords = Optional
-          .ofNullable(this.bitableClient.listTableRecords(this.bitable, this.ordersTable))
-          .map(records -> records.stream()
-              .collect(Collectors.toMap(record -> (String) record.getFields().get("委托编号"), Function.identity())))
-          .orElse(Collections.emptyMap());
-
-      // 新增记录列表。
+      // 新增列表。
       List<Map<String, Object>> createRecords = new ArrayList<>();
 
-      // 更新记录列表。
+      // 更新列表。
       List<String> updateRecordIds = new ArrayList<>();
       List<Map<String, Object>> updateRecords = new ArrayList<>();
 
-      for (Entry<String, OrderModel> entry : leftRecords.entrySet()) {
-        String orderId = entry.getKey();
-        OrderModel order = entry.getValue();
-
-        if (!rightRecords.containsKey(orderId)) {
-          // 新增记录。
+      for (OrderModel order : orders) {
+        String orderId = order.getOrderId();
+        if (!this.hasOrderId(orderId)) {
+          // 委托不存在于多维表格中，需要新增。
           createRecords.add(toRecord(order));
-        } else if (shouldUpdateRecord(rightRecords.get(orderId))
-            && !OrderModel.equals(order, toOrderModel(rightRecords.get(orderId)))) {
-          // 更新记录。
-          updateRecordIds.add(rightRecords.get(orderId).getRecordId());
-          updateRecords.add(toRecord(order));
+
+          continue;
         }
+
+        OrderModel existingOrder = this.getOrder(orderId);
+        if (OrderModel.equals(order, existingOrder)) {
+          // 委托存在于多维表格中，且数据相同，跳过。
+          continue;
+        }
+
+        // 委托存在于多维表格中，但数据不同，需要更新。
+        updateRecordIds.add(this.getOrderRecordId(orderId));
+        updateRecords.add(toRecord(order));
       }
 
       if (!createRecords.isEmpty()) {
-        // 批量新增记录。
-        this.bitableClient.batchCreateRecords(this.bitable, this.ordersTable, createRecords);
+        // 新增。
+        List<AppTableRecord> createdRecords = this.bitableClient.batchCreateRecords(this.bitable, this.ordersTable,
+            createRecords);
+        this.addOrderRecords(createdRecords);
       }
 
       if (!updateRecordIds.isEmpty()) {
-        // 批量更新记录。
-        this.bitableClient.batchUpdateRecords(this.bitable, this.ordersTable, updateRecordIds, updateRecords);
+        // 更新。
+        List<AppTableRecord> updatedRecords = this.bitableClient.batchUpdateRecords(this.bitable, this.ordersTable,
+            updateRecordIds, updateRecords);
+        this.addOrderRecords(updatedRecords);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);

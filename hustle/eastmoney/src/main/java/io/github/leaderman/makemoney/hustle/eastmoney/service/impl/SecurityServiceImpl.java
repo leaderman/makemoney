@@ -265,9 +265,15 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     return securityCodes.stream().allMatch(this.securityRecordIds::containsKey);
   }
 
-  private void reloadSecurityRecordIds() throws Exception {
-    this.securityRecordIds.putAll(this.bitableClient.listTableRecords(this.bitable, this.securitiesTable)
-        .stream()
+  private synchronized void reloadSecurityRecordIds() throws Exception {
+    this.securityRecordIds.clear();
+
+    List<AppTableRecord> records = this.bitableClient.listTableRecords(this.bitable, this.securitiesTable);
+    if (CollectionUtils.isEmpty(records)) {
+      return;
+    }
+
+    this.securityRecordIds.putAll(records.stream()
         .collect(Collectors.toMap(record -> (String) record.getFields().get("证券代码"), record -> record.getRecordId())));
   }
 
