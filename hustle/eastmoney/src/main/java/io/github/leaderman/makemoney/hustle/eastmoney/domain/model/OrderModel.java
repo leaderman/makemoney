@@ -8,10 +8,12 @@ import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString
+@Slf4j
 public class OrderModel extends BaseModel {
   // 委托时间。
   private String orderTime;
@@ -58,6 +60,19 @@ public class OrderModel extends BaseModel {
   }
 
   public static boolean equals(OrderModel left, OrderModel right) {
+    log.info("orderTime: {}", left.getOrderTime().equals(right.getOrderTime()));
+    log.info("securityCode: {}", left.getSecurityCode().equals(right.getSecurityCode()));
+    log.info("securityName: {}", left.getSecurityName().equals(right.getSecurityName()));
+    log.info("orderSide: {}", left.getOrderSide().equals(right.getOrderSide()));
+    log.info("orderQuantity: {}", left.getOrderQuantity().equals(right.getOrderQuantity()));
+    log.info("orderStatus: {}", left.getOrderStatus().equals(right.getOrderStatus()));
+    log.info("orderPrice: {}", left.getOrderPrice().equals(right.getOrderPrice()));
+    log.info("filledQuantity: {}", left.getFilledQuantity().equals(right.getFilledQuantity()));
+    log.info("filledAmount: {}", left.getFilledAmount().equals(right.getFilledAmount()));
+    log.info("avgFilledPrice: {}", left.getAvgFilledPrice().equals(right.getAvgFilledPrice()));
+    log.info("orderId: {}", left.getOrderId().equals(right.getOrderId()));
+    log.info("currency: {}", left.getCurrency().equals(right.getCurrency()));
+
     return left.getOrderTime().equals(right.getOrderTime())
         && left.getSecurityCode().equals(right.getSecurityCode())
         && left.getSecurityName().equals(right.getSecurityName())
