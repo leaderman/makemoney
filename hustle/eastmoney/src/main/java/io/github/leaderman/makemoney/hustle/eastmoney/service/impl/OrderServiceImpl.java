@@ -122,11 +122,13 @@ public class OrderServiceImpl implements OrderService {
       if (!createRecords.isEmpty()) {
         // 新增。
         this.bitableClient.batchCreateRecords(this.bitable, this.ordersTable, createRecords);
+        log.info("新增 {} 条记录", createRecords.size());
       }
 
       if (!updateRecordIds.isEmpty()) {
         // 更新。
         this.bitableClient.batchUpdateRecords(this.bitable, this.ordersTable, updateRecordIds, updateRecords);
+        log.info("更新 {} 条记录", updateRecordIds.size());
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
