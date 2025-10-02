@@ -86,7 +86,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
      */
     if (NumberUtil.greaterThan(entity.getPositionProfitLossMax(), BigDecimal.ZERO)
         && NumberUtil.greaterThan(entity.getPositionProfitLossMax(), existingEntity.getPositionProfitLossMax())) {
-      String title = String.format("持仓盈利新高");
+      String title = String.format("持仓盈利新高 - %s", entity.getSecurityName());
       String content = String.format("盈利金额：%s\\n日期时间：%s", entity.getPositionProfitLossMax(),
           DatetimeUtil.getDatetime());
 
@@ -103,7 +103,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
      */
     if (NumberUtil.lessThan(entity.getPositionProfitLossMin(), BigDecimal.ZERO)
         && NumberUtil.lessThan(entity.getPositionProfitLossMin(), existingEntity.getPositionProfitLossMin())) {
-      String title = String.format("持仓亏损新低");
+      String title = String.format("持仓亏损新低 - %s", entity.getSecurityName());
       String content = String.format("亏损金额：%s\\n日期时间：%s", entity.getPositionProfitLossMin(),
           DatetimeUtil.getDatetime());
 
@@ -120,7 +120,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
      */
     if (NumberUtil.greaterThan(entity.getDailyProfitLossMax(), BigDecimal.ZERO)
         && NumberUtil.greaterThan(entity.getDailyProfitLossMax(), existingEntity.getDailyProfitLossMax())) {
-      String title = String.format("当日盈利新高");
+      String title = String.format("当日盈利新高 - %s", entity.getSecurityName());
       String content = String.format("盈利金额：%s\\n日期时间：%s", entity.getDailyProfitLossMax(),
           DatetimeUtil.getDatetime());
 
@@ -137,7 +137,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
      */
     if (NumberUtil.lessThan(entity.getDailyProfitLossMin(), BigDecimal.ZERO)
         && NumberUtil.lessThan(entity.getDailyProfitLossMin(), existingEntity.getDailyProfitLossMin())) {
-      String title = String.format("当日亏损新低");
+      String title = String.format("当日亏损新低 - %s", entity.getSecurityName());
       String content = String.format("亏损金额：%s\\n日期时间：%s", entity.getDailyProfitLossMin(),
           DatetimeUtil.getDatetime());
 
