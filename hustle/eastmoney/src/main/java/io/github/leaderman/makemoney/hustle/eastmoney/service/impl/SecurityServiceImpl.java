@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,7 +28,6 @@ import io.github.leaderman.makemoney.hustle.feishu.ImClient;
 import io.github.leaderman.makemoney.hustle.lang.DatetimeUtil;
 import io.github.leaderman.makemoney.hustle.lang.NumberUtil;
 import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,9 +48,6 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
   private String dailyProfitHighSecurityChat;
   private String dailyLossLowSecurityChat;
 
-  // 多维表格记录 ID 缓存。
-  private final Map<String, String> securityRecordIds = new ConcurrentHashMap<>();
-
   @PostConstruct
   public void init() {
     this.bitable = this.configClient.getString("eastmoney.bitable");
@@ -63,19 +58,6 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
 
     this.dailyProfitHighSecurityChat = this.configClient.getString("feishu.chat.daily.profit.high.security");
     this.dailyLossLowSecurityChat = this.configClient.getString("feishu.chat.daily.loss.low.security");
-  }
-
-  @AllArgsConstructor
-  private class ChangeEntities {
-    private List<SecurityEntity> createEntities;
-    private List<SecurityEntity> updateEntities;
-    private List<SecurityEntity> deleteEntities;
-
-    public boolean hasChanges() {
-      return CollectionUtils.isNotEmpty(this.createEntities)
-          || CollectionUtils.isNotEmpty(this.updateEntities)
-          || CollectionUtils.isNotEmpty(this.deleteEntities);
-    }
   }
 
   private void newPositionProfitLossMax(SecurityEntity entity, SecurityEntity existingEntity) {
@@ -146,7 +128,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     }
   }
 
-  private ChangeEntities syncDb(List<SecurityModel> securities) {
+  private boolean syncDb(List<SecurityModel> securities) {
     // 新增列表。
     List<SecurityEntity> createEntities = new ArrayList<>();
     // 更新列表。
@@ -225,148 +207,142 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
       }
     }
 
+    boolean changed = false;
+
     if (CollectionUtils.isNotEmpty(createEntities)) {
       // 新增。
       this.saveBatch(createEntities);
+      changed = true;
     }
 
     if (CollectionUtils.isNotEmpty(updateEntities)) {
       // 更新。
       this.updateBatchById(updateEntities);
+      changed = true;
     }
 
     if (CollectionUtils.isNotEmpty(deleteEntities)) {
       // 删除。
       this.removeByIds(deleteEntities.stream().map(SecurityEntity::getId).collect(Collectors.toList()));
+      changed = true;
     }
 
-    return new ChangeEntities(createEntities, updateEntities, deleteEntities);
+    return changed;
   }
 
-  private Map<String, Object> toRecord(SecurityEntity entity) {
+  private String getSecurityCode(AppTableRecord record) {
+    return (String) record.getFields().get("证券代码");
+  }
+
+  private Map<String, Object> toRecord(SecurityModel model) {
     Map<String, Object> record = new HashMap<>();
 
-    record.put("证券代码", entity.getSecurityCode());
-    record.put("证券名称", entity.getSecurityName());
-    record.put("持仓数量", entity.getHoldingQuantity());
-    record.put("可用数量", entity.getAvailableQuantity());
-    record.put("成本价", entity.getCostPrice());
-    record.put("当前价", entity.getCurrentPrice());
-    record.put("最新市值", entity.getMarketValue());
-    record.put("持仓盈亏", entity.getPositionProfitLoss());
-    record.put("持仓盈亏比例", entity.getPositionProfitLossRatio());
-    record.put("当日盈亏", entity.getDailyProfitLoss());
-    record.put("当日盈亏比例", entity.getDailyProfitLossRatio());
+    record.put("证券代码", model.getSecurityCode());
+    record.put("证券名称", model.getSecurityName());
+    record.put("持仓数量", model.getHoldingQuantity());
+    record.put("可用数量", model.getAvailableQuantity());
+    record.put("成本价", model.getCostPrice());
+    record.put("当前价", model.getCurrentPrice());
+    record.put("最新市值", model.getMarketValue());
+    record.put("持仓盈亏", model.getPositionProfitLoss());
+    record.put("持仓盈亏比例", model.getPositionProfitLossRatio());
+    record.put("当日盈亏", model.getDailyProfitLoss());
+    record.put("当日盈亏比例", model.getDailyProfitLossRatio());
 
     return record;
   }
 
-  private boolean hasSecurityRecordIds(List<String> securityCodes) {
-    return securityCodes.stream().allMatch(this.securityRecordIds::containsKey);
+  private SecurityModel toModel(AppTableRecord record) {
+    SecurityModel model = new SecurityModel();
+
+    model.setSecurityCode(this.getSecurityCode(record));
+    model.setSecurityName((String) record.getFields().get("证券名称"));
+    model.setHoldingQuantity(NumberUtil.toInteger((String) record.getFields().get("持仓数量"), 0));
+    model.setAvailableQuantity(NumberUtil.toInteger((String) record.getFields().get("可用数量"), 0));
+    model.setCostPrice(NumberUtil.toBigDecimal((String) record.getFields().get("成本价"), BigDecimal.ZERO));
+    model.setCurrentPrice(NumberUtil.toBigDecimal((String) record.getFields().get("当前价"), BigDecimal.ZERO));
+    model.setMarketValue(NumberUtil.toBigDecimal((String) record.getFields().get("最新市值"), BigDecimal.ZERO));
+    model.setPositionProfitLoss(NumberUtil.toBigDecimal((String) record.getFields().get("持仓盈亏"), BigDecimal.ZERO));
+    model.setPositionProfitLossRatio(
+        NumberUtil.toBigDecimal((String) record.getFields().get("持仓盈亏比例"), BigDecimal.ZERO));
+    model.setDailyProfitLoss(NumberUtil.toBigDecimal((String) record.getFields().get("当日盈亏"), BigDecimal.ZERO));
+    model.setDailyProfitLossRatio(NumberUtil.toBigDecimal((String) record.getFields().get("当日盈亏比例"), BigDecimal.ZERO));
+
+    return model;
   }
 
-  private synchronized void reloadSecurityRecordIds() throws Exception {
-    this.securityRecordIds.clear();
+  private void syncBitable(List<SecurityModel> models) throws Exception {
+    // 过滤掉不再持仓的证券。
+    models = models.stream().filter(model -> model.getHoldingQuantity() > 0).collect(Collectors.toList());
 
-    List<AppTableRecord> records = this.bitableClient.listTableRecords(this.bitable, this.securitiesTable);
-    if (CollectionUtils.isEmpty(records)) {
-      return;
-    }
+    // 获取多维表格中的记录。
+    Map<String, AppTableRecord> existingRecords = Optional
+        .ofNullable(this.bitableClient.listTableRecords(this.bitable, this.securitiesTable))
+        .map(records -> records.stream().collect(Collectors.toMap(this::getSecurityCode, Function.identity())))
+        .orElse(Collections.emptyMap());
 
-    this.securityRecordIds.putAll(records.stream()
-        .collect(Collectors.toMap(record -> (String) record.getFields().get("证券代码"), record -> record.getRecordId())));
-  }
+    // 新增列表。
+    List<Map<String, Object>> createRecords = new ArrayList<>();
+    // 更新列表。
+    List<String> updateRecordIds = new ArrayList<>();
+    List<Map<String, Object>> updateRecords = new ArrayList<>();
 
-  private String getSecurityRecordId(String securityCode) {
-    return this.securityRecordIds.get(securityCode);
-  }
+    for (SecurityModel model : models) {
+      // 证券代码。
+      String securityCode = model.getSecurityCode();
 
-  private void addSecurityRecordId(String securityCode, String recordId) {
-    this.securityRecordIds.put(securityCode, recordId);
-  }
+      if (!existingRecords.containsKey(securityCode)) {
+        // 证券不存在于多维表格中，需要新增。
+        createRecords.add(this.toRecord(model));
 
-  private void deleteSecurityRecordId(String securityCode) {
-    this.securityRecordIds.remove(securityCode);
-  }
-
-  private void createBitableRecords(List<SecurityEntity> entities) throws Exception {
-    if (CollectionUtils.isEmpty(entities)) {
-      return;
-    }
-
-    List<Map<String, Object>> records = entities.stream().map(this::toRecord).collect(Collectors.toList());
-    List<AppTableRecord> createdRecords = this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable,
-        records);
-    createdRecords
-        .forEach(record -> this.addSecurityRecordId((String) record.getFields().get("证券代码"), record.getRecordId()));
-  }
-
-  private void updateBitableRecords(List<SecurityEntity> entities) throws Exception {
-    if (CollectionUtils.isEmpty(entities)) {
-      return;
-    }
-
-    List<String> securityCodes = entities.stream().map(SecurityEntity::getSecurityCode).collect(Collectors.toList());
-    if (!this.hasSecurityRecordIds(securityCodes)) {
-      this.reloadSecurityRecordIds();
-    }
-
-    List<String> recordIds = new ArrayList<>();
-    List<Map<String, Object>> records = new ArrayList<>();
-
-    for (SecurityEntity entity : entities) {
-      String recordId = this.getSecurityRecordId(entity.getSecurityCode());
-      if (StringUtils.isEmpty(recordId)) {
-        log.warn("证券 {}（{}） 不存在于多维表格中", entity.getSecurityName(), entity.getSecurityCode());
         continue;
       }
 
-      recordIds.add(recordId);
-      records.add(this.toRecord(entity));
-    }
-
-    this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, recordIds, records);
-  }
-
-  private void deleteBitableRecords(List<SecurityEntity> entities) throws Exception {
-    if (CollectionUtils.isEmpty(entities)) {
-      return;
-    }
-
-    List<String> securityCodes = entities.stream().map(SecurityEntity::getSecurityCode).collect(Collectors.toList());
-    if (!this.hasSecurityRecordIds(securityCodes)) {
-      this.reloadSecurityRecordIds();
-    }
-
-    List<String> recordIds = new ArrayList<>();
-
-    for (SecurityEntity entity : entities) {
-      String recordId = this.getSecurityRecordId(entity.getSecurityCode());
-      if (StringUtils.isEmpty(recordId)) {
-        log.warn("证券 {}（{}） 不存在于多维表格中", entity.getSecurityName(), entity.getSecurityCode());
+      AppTableRecord existingRecord = existingRecords.get(securityCode);
+      if (SecurityModel.equals(model, this.toModel(existingRecord))) {
+        // 证券存在于多维表格中，且数据相同，跳过。
         continue;
+      }
+
+      // 证券存在于多维表格中，但数据不同，需要更新。
+      updateRecordIds.add(existingRecord.getRecordId());
+      updateRecords.add(this.toRecord(model));
+    }
+
+    // 删除列表。
+    List<String> deleteRecordIds = new ArrayList<>();
+
+    // 证券代码集合。
+    Set<String> securityCodes = models.stream().map(SecurityModel::getSecurityCode).collect(Collectors.toSet());
+
+    for (Entry<String, AppTableRecord> entry : existingRecords.entrySet()) {
+      if (!securityCodes.contains(entry.getKey())) {
+        // 不再持仓的证券，需要删除。
+        deleteRecordIds.add(entry.getValue().getRecordId());
       }
     }
 
-    this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, recordIds);
-    securityCodes.forEach(this::deleteSecurityRecordId);
-  }
+    if (!createRecords.isEmpty()) {
+      // 新增。
+      this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, createRecords);
+    }
 
-  private void syncBitable(ChangeEntities changeEntities) throws Exception {
-    // 创建。
-    this.createBitableRecords(changeEntities.createEntities);
-    // 更新。
-    this.updateBitableRecords(changeEntities.updateEntities);
-    // 删除。
-    this.deleteBitableRecords(changeEntities.deleteEntities);
+    if (!updateRecordIds.isEmpty()) {
+      // 更新。
+      this.bitableClient.batchUpdateRecords(this.bitable, this.securitiesTable, updateRecordIds, updateRecords);
+    }
+
+    if (!deleteRecordIds.isEmpty()) {
+      // 删除。
+      this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, deleteRecordIds);
+    }
   }
 
   @Override
   public void sync(List<SecurityModel> models) {
     try {
-      ChangeEntities changeEntities = this.syncDb(models);
-      if (changeEntities.hasChanges()) {
-        this.syncBitable(changeEntities);
+      if (this.syncDb(models)) {
+        this.syncBitable(models);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
