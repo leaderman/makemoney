@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lark.oapi.service.bitable.v1.model.AppTableRecord;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.SecurityEntity;
@@ -274,13 +275,24 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     return this.securityRecordIds.get(securityCode);
   }
 
+  private void addSecurityRecordId(String securityCode, String recordId) {
+    this.securityRecordIds.put(securityCode, recordId);
+  }
+
+  private void deleteSecurityRecordId(String securityCode) {
+    this.securityRecordIds.remove(securityCode);
+  }
+
   private void createBitableRecords(List<SecurityEntity> entities) throws Exception {
     if (CollectionUtils.isEmpty(entities)) {
       return;
     }
 
     List<Map<String, Object>> records = entities.stream().map(this::toRecord).collect(Collectors.toList());
-    this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable, records);
+    List<AppTableRecord> createdRecords = this.bitableClient.batchCreateRecords(this.bitable, this.securitiesTable,
+        records);
+    createdRecords
+        .forEach(record -> this.addSecurityRecordId((String) record.getFields().get("证券代码"), record.getRecordId()));
   }
 
   private void updateBitableRecords(List<SecurityEntity> entities) throws Exception {
@@ -331,6 +343,7 @@ public class SecurityServiceImpl extends ServiceImpl<SecurityMapper, SecurityEnt
     }
 
     this.bitableClient.batchDeleteRecords(this.bitable, this.securitiesTable, recordIds);
+    securityCodes.forEach(this::deleteSecurityRecordId);
   }
 
   private void syncBitable(ChangeEntities changeEntities) throws Exception {
