@@ -35,4 +35,24 @@ public class DatetimeUtilTest {
   public void testFormatDatetime() {
     System.out.println(DatetimeUtil.formatDatetime(LocalDateTime.now()));
   }
+
+  @Test
+  public void testParseDate() {
+    System.out.println(DatetimeUtil.parseDate("2025-07-28"));
+  }
+
+  @Test
+  public void testParseDatetime() {
+    System.out.println(DatetimeUtil.formatDatetime(DatetimeUtil.parseDatetime("2025-07-28 10:11:12")));
+  }
+
+  @Test
+  public void testStartOfDay() {
+    System.out.println(DatetimeUtil.formatDatetime(DatetimeUtil.startOfDay()));
+  }
+
+  @Test
+  public void testEndOfDay() {
+    System.out.println(DatetimeUtil.formatDatetime(DatetimeUtil.endOfDay()));
+  }
 }

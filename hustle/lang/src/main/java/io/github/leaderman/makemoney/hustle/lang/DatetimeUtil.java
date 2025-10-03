@@ -97,4 +97,42 @@ public class DatetimeUtil {
   public static String formatDatetime(LocalDateTime datetime) {
     return datetime.format(DATETIME_FORMATTER);
   }
+
+  /**
+   * 解析日期。
+   * 
+   * @param date 日期，格式：yyyy-MM-dd。
+   * @return 日期时间。
+   */
+  public static LocalDateTime parseDate(String date) {
+    return LocalDate.parse(date, DATE_FORMATTER).atStartOfDay();
+  }
+
+  /**
+   * 解析日期时间。
+   * 
+   * @param datetime 日期时间，格式：yyyy-MM-dd HH:mm:ss。
+   * @return 日期时间。
+   */
+  public static LocalDateTime parseDatetime(String datetime) {
+    return LocalDateTime.parse(datetime, DATETIME_FORMATTER);
+  }
+
+  /**
+   * 获取当天的开始时间。
+   * 
+   * @return 当天的开始时间。
+   */
+  public static LocalDateTime startOfDay() {
+    return LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+  }
+
+  /**
+   * 获取当天的结束时间。
+   * 
+   * @return 当天的结束时间。
+   */
+  public static LocalDateTime endOfDay() {
+    return LocalDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+  }
 }
