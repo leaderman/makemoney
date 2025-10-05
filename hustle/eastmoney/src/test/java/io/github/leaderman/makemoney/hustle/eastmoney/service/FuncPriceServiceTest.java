@@ -1,5 +1,6 @@
 package io.github.leaderman.makemoney.hustle.eastmoney.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,17 @@ public class FuncPriceServiceTest {
         DatetimeUtil.parseDatetime("2025-09-30 23:59:59"));
     bucketPrices.forEach(System.out::println);
 
-    bucketPrices = fundPriceService.bucket("513970", 300);
+    bucketPrices = fundPriceService.bucket("513970", 600);
     bucketPrices.forEach(System.out::println);
+  }
+
+  @Test
+  public void testShouldIntervene() {
+    String code = "520500";
+    int size = 60;
+    LocalDateTime start = DatetimeUtil.parseDatetime("2025-09-30 09:30:00");
+    LocalDateTime end = DatetimeUtil.parseDatetime("2025-09-30 13:08:59");
+
+    System.out.println(fundPriceService.shouldIntervene(code, size, start, end));
   }
 }

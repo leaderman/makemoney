@@ -39,7 +39,7 @@ public interface FundPriceService extends IService<FundPriceEntity> {
    * 获取基金分桶价格。
    * 
    * @param code  基金代码。
-   * @param size  价格数量。
+   * @param size  分桶大小。
    * @param start 开始时间。
    * @param end   结束时间。
    * @return 基金分桶价格列表。
@@ -50,8 +50,26 @@ public interface FundPriceService extends IService<FundPriceEntity> {
    * 获取当天的基金分桶价格。
    * 
    * @param code 基金代码。
-   * @param size 价格数量。
+   * @param size 分桶大小。
    * @return 基金分桶价格列表。
    */
   List<FundBucketPriceModel> bucket(String code, int size);
+
+  /**
+   * 根据基金价格判断是否需要人工介入。
+   * 
+   * @param code  基金代码。
+   * @param size  分桶大小。
+   * @param start 开始时间。
+   * @return 是否需要人工介入。
+   */
+  boolean shouldIntervene(String code, int size, LocalDateTime start, LocalDateTime end);
+
+  /**
+   * 根据基金价格判断是否需要人工介入。
+   * 
+   * @param code 基金代码。
+   * @return 是否需要人工介入。
+   */
+  boolean shouldIntervene(String code);
 }

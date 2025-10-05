@@ -28,7 +28,7 @@ public interface FundPriceMapper extends BaseMapper<FundPriceEntity> {
         code,
         bucketed_at
       ORDER BY
-        bucketed_at DESC
+        bucketed_at
       """)
   List<FundBucketPriceView> bucket(@Param("code") String code, @Param("size") int size,
       @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
