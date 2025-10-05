@@ -32,7 +32,7 @@ public class LimiterClient {
         k -> proxyManager.builder().build(k, () -> BucketConfiguration.builder()
             .addLimit((limit -> limit.capacity(capacity)
                 .refillGreedy(capacity, Duration.ofSeconds(seconds))
-                .initialTokens(capacity)))
+                .initialTokens(0)))
             .build()));
   }
 

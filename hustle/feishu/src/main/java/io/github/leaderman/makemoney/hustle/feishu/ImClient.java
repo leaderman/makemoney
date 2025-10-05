@@ -368,6 +368,22 @@ public class ImClient {
   }
 
   /**
+   * 异步发送黄色消息。
+   * 
+   * @param chatId  群 ID。
+   * @param title   标题。
+   * @param content 内容。
+   */
+  @Async
+  public void sendYellowMessageByChatIdAsync(String chatId, String title, String content) {
+    try {
+      this.sendYellowMessageByChatId(chatId, title, content);
+    } catch (Exception e) {
+      log.error("发送黄色消息错误：{}", ExceptionUtils.getStackTrace(e));
+    }
+  }
+
+  /**
    * 发送红色消息。
    * 
    * @param chatId  群 ID。

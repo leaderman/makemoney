@@ -71,4 +71,23 @@ public class FundModel extends BaseModel {
 
     return entity;
   }
+
+  public static FundModel from(FundEntity entity) {
+    FundModel model = new FundModel();
+
+    model.setId(entity.getId());
+    model.setCode(entity.getCode());
+    model.setName(entity.getName());
+    model.setOpenPrice(entity.getOpenPrice());
+    model.setLatestPrice(entity.getLatestPrice());
+    model.setHighPrice(entity.getHighPrice());
+    model.setLowPrice(entity.getLowPrice());
+    model.setChangePercent(entity.getChangePercent());
+    model.setChangeAmount(entity.getChangeAmount());
+    model.setPrevClose(entity.getPrevClose());
+    model.setCreatedAt(entity.getCreatedAt());
+    model.setUpdatedAt(entity.getUpdatedAt());
+
+    return model;
+  }
 }

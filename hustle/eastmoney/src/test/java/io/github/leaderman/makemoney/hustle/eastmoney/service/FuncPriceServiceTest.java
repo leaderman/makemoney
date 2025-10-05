@@ -44,4 +44,13 @@ public class FuncPriceServiceTest {
 
     System.out.println(fundPriceService.shouldIntervene(code, size, start, end));
   }
+
+  @Test
+  public void testIntervene() {
+    int size = 60;
+    LocalDateTime start = DatetimeUtil.parseDatetime("2025-09-30 09:30:00");
+    LocalDateTime end = DatetimeUtil.parseDatetime("2025-09-30 09:31:59");
+
+    fundPriceService.intervene(size, start, end);
+  }
 }

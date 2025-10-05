@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.entity.FundPriceEntity;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundBucketPriceModel;
+import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundPriceInterveneModel;
 import io.github.leaderman.makemoney.hustle.eastmoney.domain.model.FundPriceModel;
 
 public interface FundPriceService extends IService<FundPriceEntity> {
@@ -63,7 +64,7 @@ public interface FundPriceService extends IService<FundPriceEntity> {
    * @param start 开始时间。
    * @return 是否需要人工介入。
    */
-  boolean shouldIntervene(String code, int size, LocalDateTime start, LocalDateTime end);
+  FundPriceInterveneModel shouldIntervene(String code, int size, LocalDateTime start, LocalDateTime end);
 
   /**
    * 根据基金价格判断是否需要人工介入。
@@ -71,5 +72,19 @@ public interface FundPriceService extends IService<FundPriceEntity> {
    * @param code 基金代码。
    * @return 是否需要人工介入。
    */
-  boolean shouldIntervene(String code);
+  FundPriceInterveneModel shouldIntervene(String code);
+
+  /**
+   * 根据基金价格判断是否需要人工介入。
+   * 
+   * @param size  分桶大小。
+   * @param start 开始时间。
+   * @param end   结束时间。
+   */
+  void intervene(int size, LocalDateTime start, LocalDateTime end);
+
+  /**
+   * 根据基金价格判断是否需要人工介入。
+   */
+  void intervene();
 }

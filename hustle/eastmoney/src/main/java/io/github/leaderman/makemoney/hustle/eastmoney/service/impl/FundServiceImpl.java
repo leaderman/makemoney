@@ -152,4 +152,9 @@ public class FundServiceImpl extends ServiceImpl<FundMapper, FundEntity> impleme
       log.info("新增或更新 {} 条实体", entities.size());
     }
   }
+
+  @Override
+  public List<FundModel> gets() {
+    return this.list().stream().map(FundModel::from).collect(Collectors.toList());
+  }
 }
