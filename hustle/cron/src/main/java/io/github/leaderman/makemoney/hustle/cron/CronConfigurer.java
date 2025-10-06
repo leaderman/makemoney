@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.leaderman.makemoney.hustle.config.ConfigClient;
+import io.github.leaderman.makemoney.hustle.cron.listener.CronJobListener;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 public class CronConfigurer {
   private final ConfigClient configClient;
   private final ObjectMapper objectMapper;
+
   private final Scheduler scheduler;
+  private final CronJobListener cronJobListener;
 
   @Data
   private static class JobSpec {
@@ -70,6 +73,9 @@ public class CronConfigurer {
   @PostConstruct
   public void configure() {
     try {
+      // 添加监听器。
+      scheduler.getListenerManager().addJobListener(cronJobListener);
+
       String json = this.configClient.getString("cron.jobs");
       if (StringUtils.isEmpty(json)) {
         return;
