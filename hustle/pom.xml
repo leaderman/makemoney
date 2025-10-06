@@ -22,6 +22,7 @@
         <module>eastmoney</module>
         <module>ism</module>
         <module>trade</module>
+        <module>cron</module>
     </modules>
 
     <parent>
