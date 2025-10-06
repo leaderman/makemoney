@@ -17,16 +17,16 @@ public class CronJobListener implements JobListener {
 
   @Override
   public void jobToBeExecuted(JobExecutionContext context) {
-    log.info("定时任务 {} 即将执行", context.getJobDetail().getKey());
+    log.info("定时任务 {} 即将执行", context.getJobDetail().getKey().getName());
   }
 
   @Override
   public void jobExecutionVetoed(JobExecutionContext context) {
-    log.info("定时任务 {} 执行被拒绝", context.getJobDetail().getKey());
+    log.info("定时任务 {} 执行被拒绝", context.getJobDetail().getKey().getName());
   }
 
   @Override
   public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-    log.info("定时任务 {} 执行完成", context.getJobDetail().getKey());
+    log.info("定时任务 {} 执行完成", context.getJobDetail().getKey().getName());
   }
 }
