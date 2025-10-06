@@ -6,11 +6,14 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
 @DisallowConcurrentExecution
+@Slf4j
 public class HelloJob extends QuartzJobBean {
   @Override
   protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-    System.out.println("Hello, Job!");
+    log.info("Hello, Job!");
   }
 }
