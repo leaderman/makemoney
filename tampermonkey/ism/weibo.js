@@ -56,9 +56,18 @@ async function getFeed(feed) {
     await window.mm.sleep(1000);
   }
 
+  // 克隆。
+  const clone = feed.cloneNode(true);
+
+  const video = window.mm.one(clone, 'div[class^="card-video_videoBox"]');
+  if (video) {
+    // 删除视频。
+    video.remove();
+  }
+
   return {
     href,
-    html: feed.outerHTML,
+    html: clone.outerHTML,
   };
 }
 
