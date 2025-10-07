@@ -76,8 +76,6 @@ public class InsightServiceImpl implements InsightService {
         this.maxRetries,
         this.retryInterval);
 
-    this.bitableClient.deleteRecord(this.bitable, this.weiboExtractTable, recordId);
-
     WeiboExtractModel model = new WeiboExtractModel();
 
     model.setHtml(html);
