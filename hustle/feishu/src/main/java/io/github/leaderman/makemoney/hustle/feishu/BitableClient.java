@@ -378,6 +378,10 @@ public class BitableClient {
           break;
         }
 
+        if (value.equals("无")) {
+          value = "";
+        }
+
         output.put(name, value);
       }
 
